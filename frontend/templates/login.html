@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+<p>&nbsp;</p>
+<p>PetReunite Login</p>
+<div class="container">
+  <div class="image-side">
+    <div class="quote">
+
+    </div>
+  </div>
+  <div class="form-side">
+    <div class="form-box">
+      <div class="logo">🐾 PetReunite</div>
+      <h1>Bienvenido de nuevo</h1>
+      <p>Ingresa tus datos para acceder a tu cuenta</p>
+
+      {% if error %}
+      <div class="error-message">{{ error }}</div>
+      {% endif %}
+
+      <form action="/login" method="POST">
+        <input type="text" name="nombre" placeholder="Usuario" required>
+        <input type="password" name="password" placeholder="Contraseña" required>
+        <button class="login-btn" type="submit">Iniciar Sesión</button>
+      </form>
+    </div>
+
+  </div>
+</div>

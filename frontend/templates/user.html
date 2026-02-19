@@ -1,0 +1,75 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='stylesUser.css') }}">
+
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de mascotas perdidas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Panel de mascotas perdidas</h1>
+        <button class="btn-new">+ Nueva publicación</button>
+        <div class="user">Ana</div>
+    </header>
+
+    <main>
+        <section class="upload-section">
+            <h2>Subir mascota perdida</h2>
+            <div class="upload-box">
+                <input type="file" id="pet-photo" accept="image/png, image/jpeg">
+                <p>Arrastra una foto aquí o haz clic para seleccionar<br>Formatos admitidos: JPG, PNG · Máx. 10 MB</p>
+            </div>
+
+        </section>
+
+        <section class="map-section">
+            <h2>Mapa de mascotas perdidas <span class="update-time">Actualizado hace 3 min</span></h2>
+            <div class="map" id="map">
+                <!-- Los puntos se agregan con JS -->
+            </div>
+            <div class="filters">
+                <button data-filter="all" class="active">Todos</button>
+                <button data-filter="perro">Perros</button>
+                <button data-filter="gato">Gatos</button>
+                <button data-filter="radius">5 km</button>
+            </div>
+            <ul class="report-list" id="report-list">
+                <!-- Lista de avisos -->
+            </ul>
+        </section>
+
+        <section class="tips-section">
+            <h2>Consejos para que tu aviso funcione mejor</h2>
+            <div class="tips">
+                <h3>Al subir la foto</h3>
+                <ul>
+                    <li>Que se vea solo la mascota</li>
+                    <li>Buena luz y sin filtros</li>
+                    <li>Evita datos personales</li>
+                </ul>
+                <h3>Información clave del aviso</h3>
+                <ul>
+                    <li>Hora y fecha exacta</li>
+                    <li>Punto donde se perdió o vio</li>
+                    <li>Señales únicas (manchas, collar, etc.)</li>
+                </ul>
+                <h3>Cómo te ayudará el mapa</h3>
+                <ul>
+                    <li>Avisos a personas cercanas</li>
+                    <li>Contacto directo con quien vea a tu mascota</li>
+                    <li>Zonas donde más se ha visto</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

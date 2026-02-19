@@ -1,0 +1,121 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f9f9f9;
+    color: #333;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.btn-new {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.user {
+    margin-left: 1rem;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    padding: 2rem;
+}
+
+.upload-section,
+.map-section {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.upload-box {
+    border: 2px dashed #ccc;
+    padding: 2rem;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
+.quick-details label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.map {
+    height: 300px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.map-point {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.map-point.perro {
+    background: #007bff;
+}
+
+.map-point.gato {
+    background: #ffa500;
+}
+
+.filters button {
+    margin-right: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.filters button.active {
+    background: #007bff;
+    color: white;
+}
+
+.report-list {
+    list-style: none;
+    padding: 0;
+}
+
+.report-list li {
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.tips-section {
+    grid-column: span 2;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.tips h3 {
+    margin-top: 1rem;
+}
