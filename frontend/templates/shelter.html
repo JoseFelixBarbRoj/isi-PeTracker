@@ -1,0 +1,106 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='stylesShelter.css') }}">
+
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Veterinario - Mascotas Perdidas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="title">
+            <h1>Panel veterinario</h1>
+            <p>Perfil clínico verificado y control de reportes</p>
+        </div>
+        <div class="user">
+            <span class="verified">Cuenta verificada · Veterinario</span>
+            <div class="avatar">Dr. Felix</div>
+            <form action="{{ url_for('logout') }}" method="get" style="display:inline;">
+                <button class="btn-logout" type="submit">Cerrar sesión</button>
+            </form>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- COLUMNA IZQUIERDA -->
+        <aside class="sidebar">
+
+            <section class="card">
+                <div class="card-header">
+                    <h2>Perfil de la clínica</h2>
+                    <span class="badge">Verificado</span>
+                </div>
+                <p>Médico veterinario · Clínica SafePaws Center</p>
+                <p>Barrio Centro · 09:00–20:00</p>
+            </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <h2>Identificación de la mascota</h2>
+                    <span class="badge light">Datos visibles</span>
+                </div>
+
+                <input type="text" id="nombre" placeholder="Nombre del animal">
+                <select id="especie">
+                    <option value="">Especie</option>
+                    <option>Perro</option>
+                    <option>Gato</option>
+                </select>
+
+                <input type="text" id="raza" placeholder="Raza">
+                <textarea id="descripcion" placeholder="Señas particulares..."></textarea>
+
+                <button onclick="agregarReporte()">Registrar reporte</button>
+            </section>
+
+            <section class="card">
+                <h2>Detalles clínicos</h2>
+                <textarea placeholder="Estado clínico actual..."></textarea>
+            </section>
+
+        </aside>
+
+        <!-- COLUMNA DERECHA -->
+        <main class="main">
+
+            <section class="card">
+                <div class="card-header">
+                    <h2>Mapa de casos asociados</h2>
+                    <span class="badge light">Vista profesional</span>
+                </div>
+
+                <div id="mapa" class="map"></div>
+
+                <div class="legend">
+                    <div><span class="dot green"></span> Clínicas asociadas</div>
+                    <div><span class="dot orange"></span> Mascotas reportadas</div>
+                    <div><span class="dot blue"></span> Tu clínica</div>
+                </div>
+            </section>
+
+            <section class="card collapsible">
+                <h2 onclick="toggleChecklist()">Checklist rápido ▼</h2>
+                <ul id="checklist">
+                    <li>Confirmar datos básicos del animal</li>
+                    <li>Escanear microchip</li>
+                    <li>Registrar última ubicación</li>
+                    <li>Tomar fotografías</li>
+                    <li>Compartir con red veterinaria</li>
+                </ul>
+            </section>
+
+        </main>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

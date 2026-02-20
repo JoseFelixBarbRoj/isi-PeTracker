@@ -1,0 +1,183 @@
+* {
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #f4f6f8;
+    color: #333;
+}
+
+/* TOPBAR */
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 20px 40px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.title h1 {
+    margin: 0;
+}
+
+.title p {
+    margin: 5px 0 0;
+    color: #777;
+    font-size: 14px;
+}
+
+.user {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.verified {
+    background: #e6f4f1;
+    padding: 6px 12px;
+    border-radius: 20px;
+    color: #007f6d;
+    font-size: 13px;
+}
+
+.avatar {
+    background: #f0f0f0;
+    padding: 8px 15px;
+    border-radius: 20px;
+}
+
+/* LAYOUT */
+
+.container {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 20px;
+    padding: 20px 40px;
+}
+
+/* CARDS */
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.badge {
+    background: #dff4ff;
+    color: #0077aa;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+}
+
+.badge.light {
+    background: #eef3f7;
+    color: #555;
+}
+
+/* FORM */
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+textarea {
+    resize: none;
+    height: 80px;
+}
+
+button {
+    margin-top: 15px;
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background: #009688;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #00796b;
+}
+
+/* MAP */
+
+.map {
+    position: relative;
+    height: 300px;
+    background: linear-gradient(#eaeaea 1px, transparent 1px),
+        linear-gradient(90deg, #eaeaea 1px, transparent 1px);
+    background-size: 40px 40px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.green {
+    background: #2ecc71;
+}
+
+.orange {
+    background: #f39c12;
+}
+
+.blue {
+    background: #3498db;
+}
+
+.legend {
+    display: flex;
+    gap: 20px;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+/* COLLAPSIBLE */
+
+.collapsible ul {
+    margin-top: 10px;
+}
+
+.collapsible h2 {
+    cursor: pointer;
+}
+
+.btn-logout {
+    background: #dc3545;
+    /* rojo tipo "danger" */
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 1rem;
+}
