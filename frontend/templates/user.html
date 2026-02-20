@@ -15,7 +15,10 @@
     <header>
         <h1>Panel de mascotas perdidas</h1>
         <button class="btn-new">+ Nueva publicación</button>
-        <div class="user">Ana</div>
+        <div class="user">Jose Felix</div>
+        <form action="{{ url_for('logout') }}" method="get" style="display:inline;">
+            <button class="btn-logout" type="submit">Cerrar sesión</button>
+        </form>
     </header>
 
     <main>

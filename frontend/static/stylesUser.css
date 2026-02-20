@@ -119,3 +119,14 @@ main {
 .tips h3 {
     margin-top: 1rem;
 }
+
+.btn-logout {
+    background: #dc3545;
+    /* rojo tipo "danger" */
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 1rem;
+}
