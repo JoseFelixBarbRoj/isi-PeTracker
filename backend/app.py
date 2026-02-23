@@ -123,10 +123,19 @@ def logout():
 
 @app.route("/predict", methods=["POST"])
 def predict_image():
-    if not session or session["account_type"] != "user":
-        return jsonify({"error": "Unauthorized"}), 401
+    username = session.get("nombre")
+    if not username:
+        return jsonify({"error": "Invalid session"}), 401
+    
+    if session.get("account_type") != "user":
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    if "imagen" not in request.files:
+        return jsonify({"error": "No image provided"}), 400
 
-    username = session["nombre"]
+    if not request.form.get("latitud") or not request.form.get("longitud"):
+        return jsonify({"error": "Missing coordinates"}), 400
+
     file = request.files["imagen"]
     original_name = secure_filename(file.filename)
     user_folder = UPLOAD_FOLDER / username
