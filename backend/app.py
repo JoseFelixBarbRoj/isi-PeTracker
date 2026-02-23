@@ -44,7 +44,7 @@ class Shelter(db.Model):
         contraseña_hash = db.Column(db.String(255), nullable=False)
         
 class LostReport(db.Model):
-        __tablename__ = "perros_perdidos"
+        __tablename__ = "mascotas_perdidas"
 
         id = db.Column(db.Integer, primary_key=True, autoincrement=True)
         path_imagen = db.Column(db.String(255), nullable=False)
@@ -55,7 +55,7 @@ class LostReport(db.Model):
         username = db.Column(db.String(50), nullable=False)
         
 class ShelterReport(db.Model):
-        __tablename__ = "perros_acogidos"
+        __tablename__ = "mascotas_acogidas"
 
         id = db.Column(db.Integer, primary_key=True, autoincrement=True)
         path_imagen = db.Column(db.String(255), nullable=False)
@@ -173,11 +173,11 @@ def predict_image():
     
     nearby_protected = [
     {
-        "category": r.raza,
-        "latitude": r.latitud,
-        "longitude": r.longitud,
-        "relative_path": r.path_imagen,
-        "shelter_name": r.protectora,
+        "raza": r.raza,
+        "latitud": r.latitud,
+        "longitud": r.longitud,
+        "path_imagen": r.path_imagen,
+        "protectora": r.protectora,
         "timestamp":  r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT"),
         "distancia_km": haversine(latitude, longitude, float(r.latitud), float(r.longitud))
     }
