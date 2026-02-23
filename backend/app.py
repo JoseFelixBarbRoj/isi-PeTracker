@@ -168,7 +168,9 @@ def predict_image():
         "username": session["nombre"],
         "path_imagen": f"static/uploads/{username}/{unique_filename}"
     }
-    protected_reports = db.session.query(ShelterReport).all()
+    
+    protected_reports = ShelterReport.query.filter_by(raza=category).all()
+    
     nearby_protected = [
     {
         "category": r.raza,
@@ -179,8 +181,8 @@ def predict_image():
         "timestamp":  r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT"),
         "distancia_km": haversine(latitude, longitude, float(r.latitud), float(r.longitud))
     }
-    for r in protected_reports
-    if r.raza == category]
+    for r in protected_reports]
+    
     return jsonify({
         "reporte_usuario": report,
         "protegidos_similares": nearby_protected
