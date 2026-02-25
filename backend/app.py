@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
-from model import predict
+from backend.model import predict
 
 def haversine(lat1, lon1, lat2, lon2):
         R = 6371.0
