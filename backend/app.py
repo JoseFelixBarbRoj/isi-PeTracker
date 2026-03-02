@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from datetime import datetime
 from math import radians, cos, sin, sqrt, atan2
@@ -18,13 +19,20 @@ def haversine(lat1, lon1, lat2, lon2):
         c = 2*atan2(sqrt(a), sqrt(1-a))
         return R * c
     
+if not Path("config.json").exists():
+    raise FileNotFoundError("No se encontró el archivo de configuración 'config.json' en el directorio raíz del proyecto.")
+
+with open("config.json") as f:
+    config = json.load(f)
+    
 app = Flask(__name__, 
                 template_folder=Path("../frontend/templates"),
                 static_folder=Path("../frontend/static"))
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-        "mysql+pymysql://root:1234@localhost:3306/perros_app"  #Sustituir por user_password de mysql
+        f"mysql+pymysql://{config['db_user']}:{config['db_password']}@localhost:3306/perros_app"
     )
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
