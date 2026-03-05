@@ -11,7 +11,7 @@ header {
     align-items: center;
     background: #fff;
     padding: 1rem 2rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 header h1 {
@@ -28,7 +28,13 @@ header h1 {
     cursor: pointer;
 }
 
-.user {
+.btn-logout {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
     margin-left: 1rem;
 }
 
@@ -44,7 +50,7 @@ main {
     background: white;
     padding: 1rem 1.5rem;
     border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .upload-box {
@@ -56,56 +62,53 @@ main {
     margin-bottom: 1rem;
 }
 
-.quick-details label {
-    display: block;
-    margin-bottom: 0.5rem;
-}
-
-.map {
-    height: 300px;
-    background: #e0e0e0;
+#map {
+    height: 550px;
+    width: 100%;
     border-radius: 10px;
-    margin-bottom: 1rem;
-    position: relative;
+    margin-top: 10px;
 }
 
-.map-point {
-    position: absolute;
-    width: 12px;
-    height: 12px;
+.legend {
+    margin-top: 10px;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    font-size: 14px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.legend-color {
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    cursor: pointer;
+    margin-right: 8px;
 }
 
-.map-point.perro {
-    background: #007bff;
+.legend-blue { background: #2A81CB; }
+.legend-red { background: #d9534f; }
+
+.distance-filter {
+    margin-top: 10px;
 }
 
-.map-point.gato {
-    background: #ffa500;
-}
-
-.filters button {
-    margin-right: 0.5rem;
-    padding: 0.3rem 0.8rem;
+.distance-filter button {
+    margin-right: 5px;
+    padding: 5px 10px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
 
-.filters button.active {
+.distance-filter button.active {
     background: #007bff;
     color: white;
-}
-
-.report-list {
-    list-style: none;
-    padding: 0;
-}
-
-.report-list li {
-    padding: 0.5rem;
-    border-bottom: 1px solid #eee;
 }
 
 .tips-section {
@@ -113,20 +116,5 @@ main {
     background: white;
     padding: 1rem 1.5rem;
     border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.tips h3 {
-    margin-top: 1rem;
-}
-
-.btn-logout {
-    background: #dc3545;
-    /* rojo tipo "danger" */
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-left: 1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }

@@ -1,84 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link rel="stylesheet" href="{{ url_for('static', filename='stylesUser.css') }}">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de mascotas perdidas</title>
+<title>PetTracker</title>
 </head>
 
 <body>
-    <header>
-        <h1>Panel de mascotas perdidas</h1>
-        <button class="btn-new">+ Nueva publicación</button>
-        <div class="user">Jose Felix</div>
-        <form action="{{ url_for('logout') }}" method="get" style="display:inline;">
-            <button class="btn-logout" type="submit">Cerrar sesión</button>
-        </form>
-    </header>
 
-    <main>
-        <section class="upload-section">
-    <h2>Subir mascota perdida</h2>
-    <form id="upload-form">
-        <div class="upload-box" id="upload-box">
-    <input type="file" id="pet-photo" name="imagen"
-           accept="image/png, image/jpeg" hidden>
+<header>
+<h1>Panel de mascotas perdidas</h1>
+<form action="{{ url_for('logout') }}">
+<button class="btn-logout">Cerrar sesión</button>
+</form>
+</header>
 
-    <p>
-        Arrastra una foto aquí o haz clic para seleccionar<br>
-        Formatos admitidos: JPG, PNG · Máx. 10 MB
-    </p>
+<main>
+
+<section class="upload-section">
+<h2>Subir mascota perdida</h2>
+
+<form id="upload-form">
+<div class="upload-box" id="upload-box">
+<input type="file" id="pet-photo" name="imagen" hidden>
+<p>Arrastra o haz clic para seleccionar</p>
 </div>
-        <button type="submit">Analizar con IA</button>
-    </form>
+<button type="submit" id="analyze-btn" disabled>
+    Analizar con IA
+</button></form>
 </section>
-        <section class="map-section">
-            <h2>Mapa de mascotas perdidas <span class="update-time">Actualizado hace 3 min</span></h2>
-            <div class="map" id="map">
-                <!-- Los puntos se agregan con JS -->
-            </div>
-            <div class="filters">
-                <button data-filter="all" class="active">Todos</button>
-                <button data-filter="perro">Perros</button>
-                <button data-filter="gato">Gatos</button>
-                <button data-filter="radius">5 km</button>
-            </div>
-            <ul class="report-list" id="report-list">
-                <!-- Lista de avisos -->
-            </ul>
-        </section>
 
-        <section class="tips-section">
-            <h2>Consejos para que tu aviso funcione mejor</h2>
-            <div class="tips">
-                <h3>Al subir la foto</h3>
-                <ul>
-                    <li>Que se vea solo la mascota</li>
-                    <li>Buena luz y sin filtros</li>
-                    <li>Evita datos personales</li>
-                </ul>
-                <h3>Información clave del aviso</h3>
-                <ul>
-                    <li>Hora y fecha exacta</li>
-                    <li>Punto donde se perdió o vio</li>
-                    <li>Señales únicas (manchas, collar, etc.)</li>
-                </ul>
-                <h3>Cómo te ayudará el mapa</h3>
-                <ul>
-                    <li>Avisos a personas cercanas</li>
-                    <li>Contacto directo con quien vea a tu mascota</li>
-                    <li>Zonas donde más se ha visto</li>
-                </ul>
-            </div>
-        </section>
-    </main>
+<section class="map-section">
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+<h2>Mapa</h2>
+
+<div id="map"></div>
+
+<div class="legend">
+<div class="legend-item">
+<span class="legend-color legend-blue"></span>
+Tu mascota
+</div>
+<div class="legend-item">
+<span class="legend-color legend-red"></span>
+Protectora
+</div>
+</div>
+
+<div class="distance-filter">
+<button data-km="5">5 km</button>
+<button data-km="10">10 km</button>
+<button data-km="20">20 km</button>
+<button data-km="50" class="active">50 km</button>
+</div>
+
+</section>
+
+<section class="tips-section">
+<h2>Consejos</h2>
+<ul>
+<li>Foto clara</li>
+<li>Sin filtros</li>
+<li>Información exacta</li>
+</ul>
+</section>
+
+</main>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
 </body>
-
 </html>
