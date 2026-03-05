@@ -1,5 +1,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='stylesUser.css') }}">
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -8,7 +9,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de mascotas perdidas</title>
-    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -23,14 +23,20 @@
 
     <main>
         <section class="upload-section">
-            <h2>Subir mascota perdida</h2>
-            <div class="upload-box">
-                <input type="file" id="pet-photo" accept="image/png, image/jpeg">
-                <p>Arrastra una foto aquí o haz clic para seleccionar<br>Formatos admitidos: JPG, PNG · Máx. 10 MB</p>
-            </div>
+    <h2>Subir mascota perdida</h2>
+    <form id="upload-form">
+        <div class="upload-box" id="upload-box">
+    <input type="file" id="pet-photo" name="imagen"
+           accept="image/png, image/jpeg" hidden>
 
-        </section>
-
+    <p>
+        Arrastra una foto aquí o haz clic para seleccionar<br>
+        Formatos admitidos: JPG, PNG · Máx. 10 MB
+    </p>
+</div>
+        <button type="submit">Analizar con IA</button>
+    </form>
+</section>
         <section class="map-section">
             <h2>Mapa de mascotas perdidas <span class="update-time">Actualizado hace 3 min</span></h2>
             <div class="map" id="map">
@@ -72,7 +78,7 @@
         </section>
     </main>
 
-    <script src="script.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
 </html>

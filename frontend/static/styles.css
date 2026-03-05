@@ -17,7 +17,7 @@ body {
 
 .image-side {
   flex: 1;
-  background: url("assets/login-image.png") center/cover no-repeat;
+  background: url("assets/login-image.jpg") center/cover no-repeat;
   position: relative;
   display: flex;
   align-items: flex-end;
@@ -85,6 +85,7 @@ input {
   border-radius: 8px;
   border: 1px solid #ddd;
   font-size: 15px;
+  margin-bottom: 12px;
 }
 
 input:focus {
