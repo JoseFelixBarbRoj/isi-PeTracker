@@ -230,6 +230,7 @@ ISITest/
 │       ├── styles.css
 │       ├── stylesUser.css
 │       ├── stylesShelter.css
+│       ├── assets/                # Static images used in the frontend (icons, logos, UI images)
 │       ├── uploads/               # User-uploaded lost-pet images (auto-created)
 │       └── shelter_uploads/       # Shelter-uploaded pet images
 ├── testing/
