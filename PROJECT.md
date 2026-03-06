@@ -15,6 +15,7 @@
 7. [Project Structure](#project-structure)
 8. [Installation & Setup](#installation--setup)
 9. [Running the Application](#running-the-application)
+10. [Frontend Behaviour](#frontend-behaviour)
 
 ---
 
@@ -232,7 +233,7 @@ ISITest/
 │       ├── stylesShelter.css
 │       ├── assets/                # Static images used in the frontend (icons, logos, UI images)
 │       ├── uploads/               # User-uploaded lost-pet images (auto-created)
-│       └── shelter_uploads/       # Shelter-uploaded pet images
+│       └── shelters_uploads/       # Shelter-uploaded pet images
 ├── testing/
 ├── pyproject.toml                 # Package metadata & dependencies
 └── README.md
@@ -309,3 +310,105 @@ python -m backend.inference.train_model
 ```
 
 Ensure `backend/inference/data/data.csv` and the corresponding image dataset are present before running.
+
+
+## Frontend Behaviour
+
+The frontend is implemented using Flask server-rendered templates (Jinja2) combined with a lightweight client-side script (`main.js`) responsible for handling user interaction, geolocation, and map rendering.
+
+Static assets are stored in `frontend/static/` and include:
+
+- `styles.css` – styling for the login interface  
+- `stylesUser.css` – styling for the user dashboard  
+- `stylesShelter.css` – styling for the shelter dashboard  
+- `main.js` – client-side logic  
+- `assets/` – images used by the interface (e.g., login page background)  
+
+---
+
+## User Interface
+
+Three main HTML templates are currently implemented:
+
+| Page | Purpose |
+|------|----------|
+| `login.html` | Login interface for both users and shelters |
+| `user.html` | Dashboard for reporting lost pets and visualizing results |
+| `shelter.html` | Dashboard for shelters/veterinary clinics to register found animals |
+
+The user interface is styled using dedicated CSS files and designed to be responsive for different screen sizes.
+
+---
+
+## Client-Side Logic (`main.js`)
+
+The file `main.js` implements the main frontend behaviour. It is executed after the page loads via the `DOMContentLoaded` event.
+
+### Key Responsibilities
+
+#### Notification Permission
+
+At startup, the script requests browser notification permission using the Web Notification API, allowing future alerts to be implemented.
+
+---
+
+#### Image Upload Handling
+
+The upload interface supports:
+
+- Click-to-select file upload  
+- Drag-and-drop image upload  
+- Image preview before submission  
+
+The **Analyze** button remains disabled until an image is selected, preventing empty requests.
+
+---
+
+#### Geolocation Retrieval
+
+When the user submits the form, the script retrieves the user's location using the Geolocation API (`navigator.geolocation`).
+
+The following data is then sent to the backend:
+
+- Uploaded image  
+- Latitude  
+- Longitude  
+
+This data is transmitted to the `/predict` endpoint using a `fetch` POST request with `FormData`.
+
+---
+
+#### Map Rendering
+
+Results returned from the backend are displayed using **Leaflet.js**.
+
+The function `drawMap(data, maxDistance)`:
+
+- Creates a new interactive map  
+- Places a blue marker for the user report  
+- Places red markers for similar pets reported by shelters  
+- Attaches popup information with images and report details  
+
+The map is re-rendered whenever new data or filters are applied.
+
+---
+
+#### Distance Filtering
+
+The interface provides distance filter buttons (5 km, 10 km, 20 km, 50 km).
+
+Selecting a filter updates the map by displaying only shelter reports within the selected distance from the user report.
+
+Filtering is performed client-side without additional backend requests.
+
+---
+
+## Development Data
+
+During development, the database was manually populated with example records for:
+
+- Users  
+- Shelters  
+- Shelter pet reports  
+
+This sample data allows testing of the matching and map visualization functionality without requiring real user submissions.
