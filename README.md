@@ -7,5 +7,5 @@ Se recomienda utilizar entornos virtuales para instalar el proyecto.
 5) Descargar el dataset de entrenamiento: python /backend/inference/data/populate_data.py  (tarda un poco)
 6) Ejecutar: python /backend/inference/data/gen_data_csv para generar el fichero .csv con las particiones del dataset para el modelo
 7) (Opcional) Para entrenar el modelo: python backend/inference/train_model.py (recomendado solo con una CUDA GPU)
-8) Ejecutar el servidor: python app.py
+8) Ejecutar el servidor: python backend/app.py
 9) Utilizar cualquier navegador como cliente y acceder al servidor
