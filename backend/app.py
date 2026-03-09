@@ -224,15 +224,18 @@ def report_protected_pet():
     latitude = float(request.form.get("latitud"))
     longitude = float(request.form.get("longitud"))
     category = predict(file_path)  
-
+    
+    protected_reports = ShelterReport.query.all()
+    
     db.session.add(ShelterReport(
-        path_imagen=f"/static/uploads/{shelter}/{unique_filename}",
+        path_imagen=f"/static/shelters_uploads/{shelter}/{unique_filename}",
         raza=category,
         latitud=float(latitude),
         longitud=float(longitude),
         shelter=shelter
     ))
     db.session.commit()
+    
     protected_report = {
         "raza": category,
         "latitud": latitude,
@@ -257,8 +260,9 @@ def report_protected_pet():
     for r in lost_reports]
     
     return jsonify({
-        "reporte_protectora":  protected_report,
-        "perdidos_cercanos": nearby_lost
+        "reporte_actual":  protected_report,
+        "perdidos_cercanos": nearby_lost,
+        "reportes_protegidos": protected_reports
     })
     
 if __name__ == "__main__":
