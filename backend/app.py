@@ -77,7 +77,7 @@ app.secret_key = "secret-key"  # Provisional
 
 UPLOAD_FOLDER = Path(__file__).parent.parent / "frontend" / "static" / "uploads"
 UPLOAD_FOLDER.mkdir(exist_ok=True, parents=True)
-SHELTER_UPLOAD_FOLDER = Path(__file__).parent.parent / "frontend" / "static" / "shelter_uploads"
+SHELTER_UPLOAD_FOLDER = Path(__file__).parent.parent / "frontend" / "static" / "shelters_uploads"
 SHELTER_UPLOAD_FOLDER.mkdir(exist_ok=True, parents=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["SHELTER_UPLOAD_FOLDER"] = SHELTER_UPLOAD_FOLDER
@@ -194,6 +194,73 @@ def predict_image():
     return jsonify({
         "reporte_usuario": report,
         "protegidos_similares": nearby_protected
+    })
+    
+@app.route("/report", methods=["POST"])
+def report_protected_pet():
+    shelter = session.get("nombre")
+    if not shelter:
+        return jsonify({"error": "Invalid session"}), 401
+    
+    if session.get("account_type") != "shelter":
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    if "imagen" not in request.files:
+        return jsonify({"error": "No image provided"}), 400
+
+    if not request.form.get("latitud") or not request.form.get("longitud"):
+        return jsonify({"error": "Missing coordinates"}), 400
+
+    file = request.files["imagen"]
+    original_name = secure_filename(file.filename)
+    shelter_folder = SHELTER_UPLOAD_FOLDER / shelter
+    shelter_folder.mkdir(exist_ok=True, parents=True)
+    timestamp = datetime.now()
+    timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
+    suffix = Path(original_name).suffix
+    stem = Path(original_name).stem       
+    unique_filename = f"{stem}_{timestamp_str}{suffix}"
+    file_path = shelter_folder / unique_filename
+    file.save(file_path)
+
+    latitude = float(request.form.get("latitud"))
+    longitude = float(request.form.get("longitud"))
+    category = predict(file_path)  
+
+    db.session.add(ShelterReport(
+        path_imagen=f"/static/uploads/{shelter}/{unique_filename}",
+        raza=category,
+        latitud=float(latitude),
+        longitud=float(longitude),
+        shelter=shelter
+    ))
+    db.session.commit()
+    protected_report = {
+        "raza": category,
+        "latitud": latitude,
+        "longitud": longitude,
+        "fecha": timestamp.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+        "username": session["nombre"],
+        "path_imagen": f"static/uploads/{shelter}/{unique_filename}"
+    }
+    
+    lost_reports = LostReport.query.all()
+    
+    nearby_lost = [
+    {
+        "raza": r.raza,
+        "latitud": r.latitud,
+        "longitud": r.longitud,
+        "path_imagen": r.path_imagen,
+        "protectora": r.protectora,
+        "timestamp":  r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+        "distancia_km": haversine(latitude, longitude, float(r.latitud), float(r.longitud))
+    }
+    for r in lost_reports]
+    
+    return jsonify({
+        "reporte_protectora":  protected_report,
+        "perdidos_cercanos": nearby_lost
     })
     
 if __name__ == "__main__":
