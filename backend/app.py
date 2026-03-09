@@ -72,8 +72,6 @@ class ShelterReport(db.Model):
         longitud = db.Column(db.Float, nullable=False)
         fecha = db.Column(db.DateTime, default=datetime.now())
         protectora = db.Column(db.String(50), nullable=False)
-        
-app.secret_key = "secret-key"  # Provisional
 
 UPLOAD_FOLDER = Path(__file__).parent.parent / "frontend" / "static" / "uploads"
 UPLOAD_FOLDER.mkdir(exist_ok=True, parents=True)
