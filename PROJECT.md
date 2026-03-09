@@ -16,6 +16,7 @@
 8. [Installation & Setup](#installation--setup)
 9. [Running the Application](#running-the-application)
 10. [Frontend Behaviour](#frontend-behaviour)
+11. [Testing](#testing)
 
 ---
 
@@ -412,3 +413,111 @@ During development, the database was manually populated with example records for
 - Shelter pet reports  
 
 This sample data allows testing of the matching and map visualization functionality without requiring real user submissions.
+
+## Testing
+
+Automated tests are implemented using Python’s built-in **`unittest`** framework.
+Tests are stored in the `testing/` directory.
+
+### Implemented Test Suites
+
+| Test File                | Purpose                                                                            |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| `test_connectivity.py`   | Verifies connectivity with external services and the database                      |
+| `test_generated_data.py` | Validates that the locally stored dataset matches the data retrieved from the APIs |
+| `test_login.py`          | Tests the login logic for users and shelters                                       |
+
+---
+
+### Connectivity Tests
+
+The connectivity tests ensure that all external services required by the backend are reachable.
+
+The following systems are tested:
+
+* **MySQL database** connection
+* **Dog CEO API** (dog image dataset source)
+* **TheCatAPI** (cat image dataset source)
+* **OpenStreetMap / Nominatim** service used for geolocation queries
+
+Each test verifies that:
+
+* the HTTP request succeeds (`status_code == 200`)
+* the returned data format is valid
+* the service responds within the expected timeout.
+
+---
+
+### Dataset Integrity Tests
+
+Dataset tests validate that the image dataset used for machine learning training and inference is correctly generated.
+
+Two validations are performed:
+
+**Dog dataset**
+
+* Each dog breed directory in `backend/inference/data/` is inspected.
+* The test queries the Dog CEO API.
+* The number of images stored locally is compared with the number returned by the API.
+
+Only the specific breeds and sub-breeds used by the project are checked.
+
+**Cat dataset**
+
+Each cat breed folder must contain exactly **180 images**.
+
+The validated breeds are:
+
+* Bengal
+* Siamese
+* Persian
+* Ragdoll
+* Maine Coon
+* British Shorthair
+
+---
+
+### Authentication Tests
+
+The login tests verify that the authentication system behaves correctly.
+
+The following scenarios are covered:
+
+| Scenario            | Expected behaviour               |
+| ------------------- | -------------------------------- |
+| Valid user login    | Redirect to `/user` dashboard    |
+| Valid shelter login | Redirect to `/shelter` dashboard |
+| Invalid credentials | Login page rendered with error   |
+| Empty credentials   | Login rejected                   |
+
+The tests also verify that the correct **session variables** are created:
+
+```
+session["logged_in"]
+session["account_type"]
+session["nombre"]
+```
+
+---
+
+### Running the Tests
+
+Run all tests:
+
+```bash
+python -m unittest discover -s testing
+```
+
+Run a specific test suite:
+
+```bash
+python -m unittest testing.test_connectivity
+python -m unittest testing.test_generated_data
+python -m unittest testing.test_login
+```
+
+Run tests with verbose output:
+
+```bash
+python -m unittest -v
+```
