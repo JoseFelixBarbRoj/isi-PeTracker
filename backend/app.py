@@ -225,8 +225,19 @@ def report_protected_pet():
     longitude = float(request.form.get("longitud"))
     category = predict(file_path)  
     
-    protected_reports = ShelterReport.query.all()
-    
+    protected = ShelterReport.query.all()
+    protected_reports = [
+    {
+        "raza": r.raza,
+        "latitud": r.latitud,
+        "longitud": r.longitud,
+        "path_imagen": r.path_imagen,
+        "protectora": r.protectora,
+        "fecha":  r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+        "distancia_km": haversine(latitude, longitude, float(r.latitud), float(r.longitud))
+    }
+    for r in protected]
+        
     db.session.add(ShelterReport(
         path_imagen=f"/static/shelters_uploads/{shelter}/{unique_filename}",
         raza=category,
@@ -236,35 +247,34 @@ def report_protected_pet():
     ))
     db.session.commit()
     
-    protected_report = {
+    current_report = {
         "raza": category,
         "latitud": latitude,
         "longitud": longitude,
         "fecha": timestamp.strftime("%a, %d %b %Y %H:%M:%S GMT"),
-        "username": session["nombre"],
-        "path_imagen": f"static/uploads/{shelter}/{unique_filename}"
+        "protectora": session["nombre"],
+        "path_imagen": f"static/shelters_uploads/{shelter}/{unique_filename}"
     }
     
-    lost_reports = LostReport.query.all()
+    lost = LostReport.query.all()
     
-    nearby_lost = [
+    lost_reports = [
     {
         "raza": r.raza,
         "latitud": r.latitud,
         "longitud": r.longitud,
         "path_imagen": r.path_imagen,
-        "protectora": r.protectora,
-        "timestamp":  r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+        "usuario": r.username,
+        "fecha":  r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT"),
         "distancia_km": haversine(latitude, longitude, float(r.latitud), float(r.longitud))
     }
-    for r in lost_reports]
+    for r in lost]
     
     return jsonify({
-        "reporte_actual":  protected_report,
-        "perdidos_cercanos": nearby_lost,
-        "reportes_protegidos": protected_reports
+        "reporte_actual":  current_report,
+        "perdidos": lost_reports,
+        "protegidos": protected_reports
     })
     
 if __name__ == "__main__":
     app.run(debug=True)
-
