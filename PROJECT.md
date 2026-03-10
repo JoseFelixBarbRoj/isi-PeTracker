@@ -16,7 +16,10 @@
 8. [Installation & Setup](#installation--setup)
 9. [Running the Application](#running-the-application)
 10. [Frontend Behaviour](#frontend-behaviour)
-11. [Testing](#testing)
+11. [User Interface](#user-interface)
+12. [Client-Side Logic (`main.js`)](#client-side-logic-mainjs)
+13. [Development Data](#development-data)
+14. [Testing](#testing)
 
 ---
 
@@ -246,10 +249,15 @@ ISITest/
 │       ├── trainer.py             # Training loop
 │       ├── train_model.py         # Training entry point
 │       ├── metrics.py             # Accuracy function
+│       ├── data.zip               # Raw training dataset archive
 │       ├── data/
-│       │   └── data.csv           # Class labels CSV
+│       │   ├── data.csv           # Class labels CSV
+│       │   ├── gen_data_csv.py    # Script to generate data.csv
+│       │   └── populate_data.py   # Script to populate database
 │       └── models/
-│           └── best.pth           # Trained model weights
+│           ├── best.pth           # Trained model weights
+│           ├── acc_curve.png      # Training accuracy curve
+│           └── loss_curve.png     # Training loss curve
 ├── frontend/
 │   ├── templates/
 │   │   ├── login.html             # Login interface
@@ -260,10 +268,16 @@ ISITest/
 │       ├── styles.css
 │       ├── stylesUser.css
 │       ├── stylesShelter.css
-│       ├── assets/                # Static images used in the frontend
 │       ├── uploads/               # User-uploaded lost-pet images
+│       ├── shelter_uploads/       # Shelter-uploaded images
 │       └── shelters_uploads/      # Shelter-uploaded pet images
 ├── testing/
+│   ├── test_conectividad.py       # DB connectivity tests
+│   ├── test_gen_data.py           # Data generation tests
+│   ├── test_login.py              # Login endpoint tests
+│   └── test_prediccion.py         # ML prediction endpoint tests
+├── agent.md                       # Agent documentation
+├── config.json                    # Database configuration
 ├── pyproject.toml                 # Package metadata & dependencies
 └── README.md
 ```
