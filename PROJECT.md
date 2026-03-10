@@ -16,6 +16,7 @@
 8. [Installation & Setup](#installation--setup)
 9. [Running the Application](#running-the-application)
 10. [Frontend Behaviour](#frontend-behaviour)
+11. [Testing](#testing)
 
 ---
 
@@ -401,4 +402,20 @@ The function `drawMap(data, maxDistance)`:
 
 #### Distance Filtering
 
-The UI enables real-time map filtering by distance (5 km, 10 km, 20 km, 50 km). Applying a filter seamlessly refreshes the map layer via client-side processing, presenting only shelter pets falling within the chosen radii without spamming backend endpoints.
+The interface provides distance filter buttons (5 km, 10 km, 20 km, 50 km).
+
+Selecting a filter updates the map by displaying only shelter reports within the selected distance from the user report.
+
+Filtering is performed client-side without additional backend requests.
+
+---
+
+## Development Data
+
+During development, the database was manually populated with example records for:
+
+- Users  
+- Shelters  
+- Shelter pet reports  
+
+This sample data allows testing of the matching and map visualization functionality without requiring real user submissions.
