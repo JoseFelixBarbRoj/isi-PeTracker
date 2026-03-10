@@ -28,6 +28,7 @@ with open("config.json") as f:
 app = Flask(__name__, 
                 template_folder=Path("../frontend/templates"),
                 static_folder=Path("../frontend/static"))
+app.secret_key = "una_clave_secreta_muy_segura_y_unica"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
         f"mysql+pymysql://{config['db_user']}:{config['db_password']}@localhost:3306/perros_app"
@@ -243,7 +244,7 @@ def report_protected_pet():
         raza=category,
         latitud=float(latitude),
         longitud=float(longitude),
-        shelter=shelter
+        protectora=shelter
     ))
     db.session.commit()
     
