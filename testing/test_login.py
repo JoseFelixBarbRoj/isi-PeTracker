@@ -6,6 +6,7 @@ class TestLogin(unittest.TestCase):
 
     def setUp(self):
         app.config["TESTING"] = True
+        app.config["SECRET_KEY"] = "test_secret_key"
         self.client = app.test_client()
 
         with app.app_context():

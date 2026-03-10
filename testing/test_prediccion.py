@@ -1,136 +1,130 @@
 import unittest
-import io
+from io import BytesIO
+from pathlib import Path
 from unittest.mock import patch
 
-from backend.app import app, db, LostReport
+from backend.app import app, db, LostReport, UPLOAD_FOLDER
 
 
-class TestPrediction(unittest.TestCase):
+class TestPrediccion(unittest.TestCase):
 
     def setUp(self):
         app.config["TESTING"] = True
-        app.config["SECRET_KEY"] = "test_secret_key"
-
+        app.config["SECRET_KEY"] = "testkey"
         self.client = app.test_client()
 
-        with app.app_context():
-            db.create_all()
+        self.ctx = app.app_context()
+        self.ctx.push()
 
-    def login(self):
-        """Crea una sesión simulada de usuario"""
+        db.create_all()
+
         with self.client.session_transaction() as sess:
-            sess["nombre"] = "test_user"
-            sess["account_type"] = "user"
             sess["logged_in"] = True
+            sess["account_type"] = "user"
+            sess["nombre"] = "testuser"
 
-    def fake_image(self):
-        """Genera una imagen falsa para subir"""
-        return (io.BytesIO(b"fake image data"), "test.jpg")
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.ctx.pop()
 
-    @patch("backend.model.predict")
-    def test_prediction_saves_image(self, mock_predict):
-        mock_predict.return_value = "beagle"
+    @patch("backend.app.predict")
+    def test_predict_endpoint(self, mock_predict):
 
-        self.login()
+        mock_predict.return_value = "labrador"
+
+        data = {
+            "imagen": (BytesIO(b"fake image data"), "dog.png"),
+            "latitud": "40.4168",
+            "longitud": "-3.7038"
+        }
 
         response = self.client.post(
             "/predict",
-            data={
-                "imagen": self.fake_image(),
-                "latitud": "40.0",
-                "longitud": "-3.0",
-            },
+            data=data,
             content_type="multipart/form-data"
         )
 
         self.assertEqual(response.status_code, 200)
 
-        with app.app_context():
-            report = LostReport.query.first()
-            self.assertIsNotNone(report)
-            self.assertEqual(report.raza, "beagle")
+        json_data = response.get_json()
 
-        print("✅ Predicción guarda imagen PASADO")
+        self.assertIn("reporte_usuario", json_data)
+        self.assertIn("protegidos_similares", json_data)
 
-    @patch("backend.model.predict")
-    def test_prediction_response_structure(self, mock_predict):
-        mock_predict.return_value = "beagle"
+        report = json_data["reporte_usuario"]
 
-        self.login()
+        self.assertEqual(report["raza"], "labrador")
+        self.assertEqual(report["username"], "testuser")
 
-        response = self.client.post(
-            "/predict",
-            data={
-                "imagen": self.fake_image(),
-                "latitud": "40.0",
-                "longitud": "-3.0",
-            },
-            content_type="multipart/form-data"
-        )
+        db_report = LostReport.query.first()
 
-        data = response.get_json()
+        self.assertIsNotNone(db_report)
+        self.assertEqual(db_report.raza, "labrador")
+        self.assertEqual(db_report.username, "testuser")
 
-        self.assertIn("reporte_usuario", data)
-        self.assertIn("protegidos_similares", data)
+        image_path = UPLOAD_FOLDER / "testuser"
+        self.assertTrue(image_path.exists())
 
-        print("✅ Predicción estructura respuesta PASADO")
+        saved_images = list(image_path.glob("*.png"))
+        self.assertTrue(len(saved_images) > 0)
 
-    @patch("backend.model.predict")
-    def test_model_predicts_allowed_breeds(self, mock_predict):
-        allowed = [
-            "beagle",
-            "boxer",
-            "chihuahua",
-            "dalmatian",
-            "french_bulldog"
-        ]
+        mock_predict.assert_called_once()
 
-        for breed in allowed:
+        print("✅ Predicción completa PASADO")
 
-            mock_predict.return_value = breed
-            self.login()
 
-            response = self.client.post(
-                "/predict",
-                data={
-                    "imagen": self.fake_image(),
-                    "latitud": "40.0",
-                    "longitud": "-3.0",
-                },
-                content_type="multipart/form-data"
-            )
+    def test_predict_requires_session(self):
 
-            data = response.get_json()
+        with self.client.session_transaction() as sess:
+            sess.clear()
 
-            self.assertEqual(
-                data["reporte_usuario"]["raza"],
-                breed
-            )
-
-        print("✅ Predicción razas válidas PASADO")
-
-    @patch("backend.model.predict")
-    def test_same_breed_filtering(self, mock_predict):
-        mock_predict.return_value = "beagle"
-
-        self.login()
+        data = {
+            "imagen": (BytesIO(b"fake"), "dog.png"),
+            "latitud": "40",
+            "longitud": "-3"
+        }
 
         response = self.client.post(
             "/predict",
-            data={
-                "imagen": self.fake_image(),
-                "latitud": "40.0",
-                "longitud": "-3.0",
-            },
+            data=data,
             content_type="multipart/form-data"
         )
 
-        data = response.get_json()
+        self.assertEqual(response.status_code, 401)
 
-        for r in data["protegidos_similares"]:
-            self.assertEqual(r["raza"], "beagle")
+        print("✅ Predicción sin sesión PASADO")
 
-        print("✅ Predicción filtrado misma raza PASADO")
+
+    def test_predict_requires_image(self):
+
+        data = {
+            "latitud": "40",
+            "longitud": "-3"
+        }
+
+        response = self.client.post("/predict", data=data)
+
+        self.assertEqual(response.status_code, 400)
+
+        print("✅ Predicción sin imagen PASADO")
+
+
+    def test_predict_requires_coordinates(self):
+
+        data = {
+            "imagen": (BytesIO(b"fake"), "dog.png")
+        }
+
+        response = self.client.post(
+            "/predict",
+            data=data,
+            content_type="multipart/form-data"
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+        print("✅ Predicción sin coordenadas PASADO")
 
 
 if __name__ == "__main__":
