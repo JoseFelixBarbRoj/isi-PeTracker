@@ -278,5 +278,40 @@ def report_protected_pet():
         "protegidos": protected_reports
     })
     
+@app.route("/shelter/maps", methods=["GET"])
+def shelter_maps():
+    shelter = session.get("nombre")
+    if not shelter:
+        return jsonify({"error": "Invalid session"}), 401
+
+    if session.get("account_type") != "shelter":
+        return jsonify({"error": "Unauthorized"}), 403
+
+    protected_reports = ShelterReport.query.filter_by(protectora=shelter).all()
+    return jsonify({
+        "protegidos": [
+            {
+                "raza": r.raza,
+                "latitud": r.latitud,
+                "longitud": r.longitud,
+                "path_imagen": r.path_imagen,
+                "protectora": r.protectora,
+                "fecha": r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT")
+            }
+            for r in protected_reports
+        ],
+        "perdidos": [
+            {
+                "raza": r.raza,
+                "latitud": r.latitud,
+                "longitud": r.longitud,
+                "path_imagen": r.path_imagen,
+                "usuario": r.username,
+                "fecha": r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT")
+            }
+            for r in LostReport.query.all()
+        ]
+    })
+
 if __name__ == "__main__":
     app.run(debug=True)
