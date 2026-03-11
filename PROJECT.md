@@ -433,3 +433,177 @@ During development, the database was manually populated with example records for
 - Shelter pet reports  
 
 This sample data allows testing of the matching and map visualization functionality without requiring real user submissions.
+
+## Testing
+
+Automated tests are implemented using Python’s built-in **`unittest`** framework.
+All tests are located inside the `testing/` directory and validate the most important backend behaviours: connectivity, dataset integrity, authentication, and prediction functionality.
+
+---
+
+## Implemented Test Suites
+
+| Test File                | Purpose                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| `test_connectivity.py`   | Verifies connectivity with external services and the database                               |
+| `test_generated_data.py` | Validates that the locally stored dataset matches the data retrieved from the APIs          |
+| `test_login.py`          | Tests the login logic for users and shelters                                                |
+| `test_prediccion.py`     | Tests the `/predict` endpoint including image upload, breed prediction and database storage |
+
+---
+
+## Connectivity Tests
+
+The connectivity tests ensure that all external services required by the backend are reachable.
+
+The following systems are tested:
+
+* **MySQL database connection**
+* **Dog CEO API** (dog image dataset source)
+* **TheCatAPI** (cat image dataset source)
+* **OpenStreetMap / Nominatim** service used for geolocation queries
+
+Each test verifies that:
+
+* the HTTP request succeeds (`status_code == 200`)
+* the returned data format is valid
+* the service responds correctly.
+
+These tests guarantee that the backend dependencies required for dataset generation and geolocation are available.
+
+---
+
+## Dataset Integrity Tests
+
+Dataset tests validate that the image dataset used for machine learning training and inference is correctly generated.
+
+Two validations are performed.
+
+### Dog dataset
+
+Each dog breed directory in:
+
+```
+backend/inference/data/
+```
+
+is inspected.
+
+The test:
+
+1. Queries the **Dog CEO API**.
+2. Retrieves the number of images available for each breed.
+3. Compares it with the number of images stored locally.
+
+Only the breeds and sub-breeds actually used in the project are validated.
+
+This ensures that the local dataset used for training and inference matches the external dataset source.
+
+---
+
+### Cat dataset
+
+Each cat breed folder must contain exactly **180 images**.
+
+The validated breeds are:
+
+* Bengal
+* Siamese
+* Persian
+* Ragdoll
+* Maine Coon
+* British Shorthair
+
+This guarantees that the cat dataset used by the model is complete and consistent.
+
+---
+
+## Authentication Tests
+
+The login tests verify that the authentication system behaves correctly.
+
+The following scenarios are covered:
+
+| Scenario            | Expected behaviour               |
+| ------------------- | -------------------------------- |
+| Valid user login    | Redirect to `/user` dashboard    |
+| Valid shelter login | Redirect to `/shelter` dashboard |
+| Invalid credentials | Login page rendered with error   |
+| Empty credentials   | Login rejected                   |
+
+The tests also verify that the correct session variables are created:
+
+```
+session["logged_in"]
+session["account_type"]
+session["nombre"]
+```
+
+This ensures that both **user accounts** and **shelter accounts** are authenticated correctly and redirected to the appropriate dashboard.
+
+---
+
+## Prediction Endpoint Tests
+
+The `test_prediccion.py` test suite validates the behaviour of the `/predict` API endpoint.
+
+This endpoint is responsible for:
+
+* uploading a pet image
+* predicting the breed using the ML model
+* storing the report in the database
+* returning nearby matching shelter reports
+
+### Main prediction test
+
+The main test verifies the complete prediction workflow:
+
+1. A fake image is uploaded using a simulated HTTP request.
+2. The ML model prediction is **mocked** to avoid running the real neural network.
+3. The endpoint processes the request and returns a JSON response.
+
+The test validates that:
+
+* the request returns **HTTP 200**
+* the JSON response contains `reporte_usuario` and `protegidos_similares`
+* the predicted breed matches the mocked model output
+* the report is correctly inserted into the database (`LostReport`)
+* the uploaded image is saved inside the user upload folder
+* the ML prediction function is called exactly once
+
+### Error handling tests
+
+Additional tests verify that the endpoint correctly handles invalid requests:
+
+| Test Case                   | Expected Result              |
+| --------------------------- | ---------------------------- |
+| Request without session     | Returns **401 Unauthorized** |
+| Request without image       | Returns **400 Bad Request**  |
+| Request without coordinates | Returns **400 Bad Request**  |
+
+These tests ensure that the API validates all required input data and enforces authentication correctly.
+
+---
+
+## Running the Tests
+
+Run all tests:
+
+```
+python -m unittest discover -s testing
+```
+
+Run a specific test suite:
+
+```
+python -m unittest testing.test_connectivity
+python -m unittest testing.test_generated_data
+python -m unittest testing.test_login
+python -m unittest testing.test_prediccion
+```
+
+Run tests with verbose output:
+
+```
+python -m unittest -v
+```

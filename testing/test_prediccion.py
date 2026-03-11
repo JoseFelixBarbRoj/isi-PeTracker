@@ -10,7 +10,6 @@ class TestPrediccion(unittest.TestCase):
 
     def setUp(self):
         app.config["TESTING"] = True
-        app.config["SECRET_KEY"] = "testkey"
         self.client = app.test_client()
 
         self.ctx = app.app_context()
