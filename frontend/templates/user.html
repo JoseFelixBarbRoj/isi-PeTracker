@@ -13,66 +13,84 @@
 
 <body>
 
-<header>
-<h1>Panel de mascotas perdidas</h1>
-<form action="{{ url_for('logout') }}">
-<button class="btn-logout">Cerrar sesión</button>
-</form>
+<header class="topbar">
+    <div class="user-profile">
+        <div class="avatar">👤</div>
+        <div class="profile-info">
+            <span class="name">{{ nombre }}</span>
+            <span class="verified">Usuario</span>
+        </div>
+        <form action="{{ url_for('logout') }}" method="get" style="display:inline;">
+            <button class="btn-logout" type="submit">Cerrar sesión</button>
+        </form>
+    </div>
 </header>
 
-<main>
+<main class="container">
 
-<section class="upload-section">
-<h2>Subir mascota perdida</h2>
+    <!-- COLUMNA IZQUIERDA -->
+    <aside class="sidebar">
 
-<form id="upload-form">
-<div class="upload-box" id="upload-box">
-<input type="file" id="pet-photo" name="imagen" hidden>
-<p>Arrastra o haz clic para seleccionar</p>
-</div>
-<button type="submit" id="analyze-btn" disabled>
-    Analizar con IA
-</button></form>
-</section>
+        <!-- PERFIL USUARIO -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Buenos días, {{ nombre }}</h2>
+                <span class="badge">Usuario</span>
+            </div>
+            <p>Panel de reportes de mascotas perdidas</p>
+        </section>
 
-<section class="map-section">
+        <!-- SUBIR IMAGEN -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Subir mascota perdida</h2>
+            </div>
+            <div id="upload-box" class="upload-box">
+                <input type="file" id="pet-photo" name="imagen" hidden>
+                <p>Arrastra o haz clic para seleccionar</p>
+            </div>
+            <button id="analyze-btn" disabled>Analizar con IA y registrar</button>
+            <div id="message"></div>
+        </section>
 
-<h2>Mapa</h2>
+    </aside>
 
-<div id="map"></div>
+    <!-- COLUMNA DERECHA -->
+    <main class="main">
 
-<div class="legend">
-<div class="legend-item">
-<span class="legend-color legend-blue"></span>
-Tu mascota
-</div>
-<div class="legend-item">
-<span class="legend-color legend-red"></span>
-Protectora
-</div>
-</div>
+        <!-- MAPA -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Mapa de mascotas</h2>
+            </div>
+            <div id="map" class="map"></div>
 
-<div class="distance-filter">
-<button data-km="5">5 km</button>
-<button data-km="10">10 km</button>
-<button data-km="20">20 km</button>
-<button data-km="50" class="active">50 km</button>
-</div>
+            <div class="distance-filter">
+                <button data-km="5">5 km</button>
+                <button data-km="10">10 km</button>
+                <button data-km="20">20 km</button>
+                <button data-km="50" class="active">50 km</button>
+            </div>
 
-</section>
+            <div class="legend">
+                <div><span class="dot green"></span> Protectora</div>
+                <div><span class="dot blue"></span> Tu mascota</div>
+            </div>
+        </section>
 
-<section class="tips-section">
-<h2>Consejos</h2>
-<ul>
-<li>Foto clara</li>
-<li>Sin filtros</li>
-<li>Información exacta</li>
-</ul>
-</section>
+        <!-- CONSEJOS -->
+        <section class="card">
+            <h2>Consejos</h2>
+            <ul>
+                <li>Foto clara</li>
+                <li>Sin filtros</li>
+                <li>Información exacta</li>
+            </ul>
+        </section>
 
+    </main>
 </main>
 
 <script src="{{ url_for('static', filename='main.js') }}"></script>
-
 </body>
 </html>

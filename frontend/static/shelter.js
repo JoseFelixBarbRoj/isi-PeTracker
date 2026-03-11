@@ -22,8 +22,6 @@ document.addEventListener("DOMContentLoaded", function(){
         iconSize: [32,32]
     });
 
-    const especieSelect = document.getElementById("especie");
-    const razaSelect = document.getElementById("raza");
 
     const razas = {
 
@@ -53,25 +51,6 @@ document.addEventListener("DOMContentLoaded", function(){
 
     };
 
-    especieSelect.addEventListener("change", function(){
-
-        const especie = this.value;
-
-        razaSelect.innerHTML = '<option value="">Selecciona raza</option>';
-
-        if(!razas[especie]) return;
-
-        razas[especie].forEach(raza => {
-
-            const option = document.createElement("option");
-            option.value = raza;
-            option.textContent = raza.replace("_"," ");
-
-            razaSelect.appendChild(option);
-
-        });
-
-    });
 
     let backendData = null;
     let currentMap = null;
@@ -81,6 +60,14 @@ document.addEventListener("DOMContentLoaded", function(){
     preview.style.maxWidth = "100%";
     preview.style.marginTop = "10px";
     uploadBox.appendChild(preview);
+
+    const distanceButtons = document.querySelectorAll(".distance-filter button");
+
+    distanceButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = 0.4;
+        btn.style.cursor = "not-allowed";
+    });
 
     analyzeBtn.disabled = true;
     analyzeBtn.style.opacity = 0.5;
@@ -113,7 +100,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
         currentMap = L.map("map").setView(
             [data.reporte_actual.latitud, data.reporte_actual.longitud],
-            13
+            8
         );
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -136,16 +123,21 @@ document.addEventListener("DOMContentLoaded", function(){
         };
 
         // ==== TU CLÍNICA ====
-        const especieClinica = razas.Perro.includes(data.reporte_actual.raza) ? "Dog" : "Cat";
-        L.marker(
-            [data.reporte_actual.latitud, data.reporte_actual.longitud],
-            {icon: icons["clinic" + especieClinica]}
-        ).addTo(currentMap)
-        .bindPopup(`<b>🏥 Tu clínica</b><br>Raza: ${data.reporte_actual.raza}<br><img src="/${data.reporte_actual.path_imagen}" width="180">`);
+        if(data.reporte_actual){
+
+            const especieClinica = razas.Perro.includes(data.reporte_actual.raza) ? "Dog" : "Cat";
+
+            L.marker(
+                [data.reporte_actual.latitud, data.reporte_actual.longitud],
+                {icon: icons["clinic" + especieClinica]}
+            ).addTo(currentMap)
+            .bindPopup(`<b>🏥 Tu clínica</b><br>Raza: ${data.reporte_actual.raza}<br><img src="/${data.reporte_actual.path_imagen}" width="180">`);
+
+        }
 
         // ==== MASCOTAS PERDIDAS ====
         data.perdidos
-            .filter(p => !maxDistance || p.distancia_km <= maxDistance)
+            .filter(p => !maxDistance || !p.distancia_km || p.distancia_km <= maxDistance)
             .filter(p => {
                 if(currentSpecies === "all") return true;
                 if(currentSpecies === "Perro") return razas.Perro.includes(p.raza);
@@ -155,12 +147,12 @@ document.addEventListener("DOMContentLoaded", function(){
                 const especie = razas.Perro.includes(p.raza) ? "Dog" : "Cat";
                 L.marker([p.latitud, p.longitud], {icon: icons["lost" + especie]})
                 .addTo(currentMap)
-                .bindPopup(`<b>🐾 Mascota perdida</b><br>Raza: ${p.raza}<br>Usuario: ${p.usuario}<br>Distancia: ${p.distancia_km.toFixed(2)} km<br><img src="/${p.path_imagen}" width="150">`);
+                .bindPopup(`<b>🐾 Mascota perdida</b><br>Raza: ${p.raza}<br>Usuario: ${p.usuario}<br>${p.distancia_km ? "Distancia: " + p.distancia_km.toFixed(2) + " km<br>" : ""}<br><img src="/${p.path_imagen}" width="150">`);
             });
 
         // ==== MASCOTAS PROTEGIDAS / CLÍNICAS ASOCIADAS ====
         data.protegidos
-            .filter(p => !maxDistance || p.distancia_km <= maxDistance)
+            .filter(p => !maxDistance || !p.distancia_km || p.distancia_km <= maxDistance)
             .filter(p => {
                 if(currentSpecies === "all") return true;
                 if(currentSpecies === "Perro") return razas.Perro.includes(p.raza);
@@ -170,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function(){
                 const especie = razas.Perro.includes(p.raza) ? "Dog" : "Cat";
                 L.marker([p.latitud, p.longitud], {icon: icons["shelter" + especie]})
                 .addTo(currentMap)
-                .bindPopup(`<b>🏥 Clínica asociada</b><br>Raza: ${p.raza}<br>Protectora: ${p.protectora}<br>Distancia: ${p.distancia_km.toFixed(2)} km<br><img src="/${p.path_imagen}" width="150">`);
+                .bindPopup(`<b>🏥 Clínica asociada</b><br>Raza: ${p.raza}<br>Protectora: ${p.protectora}<br>${p.distancia_km ? "Distancia: " + p.distancia_km.toFixed(2) + " km<br>" : ""}<br><img src="/${p.path_imagen}" width="150">`);
             });
     }
 
@@ -194,6 +186,12 @@ document.addEventListener("DOMContentLoaded", function(){
                 const data = await response.json();
                 backendData = data;
                 drawMap(data);
+                // Activar filtros de distancia
+                distanceButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.style.opacity = 1;
+                    btn.style.cursor = "pointer";
+                });
                 message.textContent="Reporte registrado ✅";
                 message.style.color="green";
             }catch(err){ message.textContent="Error al procesar " + err.message; message.style.color="red"; }
@@ -245,12 +243,25 @@ document.addEventListener("DOMContentLoaded", function(){
 
     });
 
-    // 👇 AÑADIR ESTO
-    fetch("/reportes")
-    .then(res => res.json())
-    .then(data => {
-        backendData = data;
-        drawMap(data);
+    fetch("/shelter/maps")
+.then(res => res.json())
+.then(data => {
+
+    backendData = {
+        reporte_actual: null,
+        perdidos: data.perdidos,
+        protegidos: data.protegidos
+    };
+
+    // usar primer punto para centrar mapa
+        if(data.protegidos.length > 0){
+            backendData.reporte_actual = data.protegidos[0];
+        } else if(data.perdidos.length > 0){
+            backendData.reporte_actual = data.perdidos[0];
+        }
+
+        drawMap(backendData);
+
     });
 
 });

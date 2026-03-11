@@ -34,11 +34,10 @@
         <!-- Perfil clínica -->
         <section class="card">
             <div class="card-header">
-                <h2>Perfil de la clínica</h2>
+                <h2>Buenos días, {{ nombre }}</h2>
                 <span class="badge">Verificado</span>
             </div>
-            <p>Médico veterinario · Clínica SafePaws Center</p>
-            <p>Barrio Centro · 09:00–20:00</p>
+            <p>Panel de gestión de reportes</p>
         </section>
 
         <!-- Registro de mascota -->
@@ -46,17 +45,6 @@
             <div class="card-header">
                 <h2>Registrar mascota</h2>
             </div>
-            <input type="text" id="nombre" placeholder="Nombre del animal">
-            <select id="especie">
-                <option value="">Especie</option>
-                <option>Perro</option>
-                <option>Gato</option>
-            </select>
-            <select id="raza">
-                <option value="">Selecciona raza</option>
-            </select>
-            <textarea id="descripcion" placeholder="Señas particulares..."></textarea>
-
             <div id="upload-box" class="upload-box">
                 <input type="file" id="pet-photo" name="imagen" hidden>
                 <p>Arrastra o haz clic para seleccionar imagen</p>
