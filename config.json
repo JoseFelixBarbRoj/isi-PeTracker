@@ -1,4 +1,5 @@
 {
     "db_user" : "root",
-    "db_password" : "1234"
+    "db_password" : "1234",
+    "secret_key" : "una_clave_secreta_muy_segura_y_unica"
 }
