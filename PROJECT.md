@@ -63,6 +63,8 @@ The application is a **server-rendered Flask MVC app** with AJAX endpoints (`/pr
 | Data manipulation | Pandas, NumPy |
 | Packaging | Hatchling (`pyproject.toml`) |
 | Python version | ≥ 3.12 |
+| External APIs | Dog CEO API (dogs), TheCatAPI (cats) |
+| Mapping | OpenStreetMap (Leaflet.js) |
 
 ---
 
@@ -135,6 +137,7 @@ The database name is **`perros_app`**, configured via MySQL at `localhost:3306`.
 | `GET` | `/logout` | Any | Clear session and redirect to login |
 | `POST` | `/predict` | `user` session | Upload pet image + coordinates → classify breed, save `LostReport`, return nearby shelter matches as JSON |
 | `POST` | `/report` | `shelter` session | Upload pet image + coordinates → classify breed, save `ShelterReport`, return similar lost/protected pets |
+| `GET` | `/shelter/maps` | `shelter` session | Retrieve protected and lost pet locations for the shelter map dashboard |
 
 ### `/predict` — Request / Response (Users)
 
@@ -201,6 +204,23 @@ The database name is **`perros_app`**, configured via MySQL at `localhost:3306`.
   ],
   "protegidos": [
     // Array of similar shelter reports
+  ]
+}
+```
+
+### `/shelter/maps` — Request / Response (Shelters)
+
+**Request** (`GET`): No body parameters required.
+
+**Response** (`application/json`): Returns all protected pets for the logged-in shelter and all globally lost pets to populate the map initially.
+
+```json
+{
+  "protegidos": [
+    // Array of shelter's own protected pets
+  ],
+  "perdidos": [
+    // Array of all lost pets reported by users
   ]
 }
 ```
@@ -366,7 +386,8 @@ Static assets are stored in `frontend/static/` and include:
 - `styles.css` – styling for the login interface  
 - `stylesUser.css` – styling for the user dashboard  
 - `stylesShelter.css` – styling for the shelter / veterinary dashboard  
-- `main.js` – client-side logic for the user upload process and maps  
+- `main.js` – client-side logic for the user dashboard (upload and maps)
+- `shelter.js` – client-side logic for the shelter dashboard, including map rendering, species/distance filtering, and initial dashboard data load via `/shelter/maps`
 
 ---
 
@@ -384,9 +405,9 @@ The user interface is styled using dedicated CSS files and designed to be respon
 
 ---
 
-## Client-Side Logic (`main.js`)
+## Client-Side Logic (`main.js` & `shelter.js`)
 
-The file `main.js` implements the main frontend behaviour for user reporting. It is executed after the page loads via the `DOMContentLoaded` event.
+The files `main.js` and `shelter.js` implement the main frontend behaviour for users and shelters. They are executed after the page loads via the `DOMContentLoaded` event.
 
 ### Key Responsibilities
 
@@ -421,6 +442,13 @@ The interface provides distance filter buttons (5 km, 10 km, 20 km, 50 km).
 Selecting a filter updates the map by displaying only shelter reports within the selected distance from the user report.
 
 Filtering is performed client-side without additional backend requests.
+
+#### Shelter Specific Features (`shelter.js`)
+
+The shelter logic includes extra functionality such as:
+- **Species Filtering**: Shelters can filter map markers specifically by dogs or cats.
+- **Initial Data Fetch**: Upon loading the dashboard, it makes a `GET` entry to `/shelter/maps` to retrieve and plot all relevant reports before any new uploads are initiated.
+- **Differentiated Markers**: Custom map pins based on animal type (dog/cat) and origin (lost/clinic).
 
 ---
 
@@ -587,10 +615,16 @@ These tests ensure that the API validates all required input data and enforces a
 
 ## Running the Tests
 
-Run all tests:
+Run all tests natively:
 
-```
+```bash
 python -m unittest discover -s testing
+```
+
+Alternatively, a `Makefile` is configured to run tests via:
+
+```bash
+make test
 ```
 
 Run a specific test suite:
