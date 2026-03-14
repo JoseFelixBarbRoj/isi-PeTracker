@@ -11,5 +11,8 @@ Se recomienda utilizar entornos virtuales para instalar el proyecto.
    
 **Opcional** Para entrenar el modelo:
 -Descargar el dataset de entrenamiento: python /backend/inference/data/populate_data.py  (tarda un poco).
+
 -Ejecutar python /backend/inference/data/gen_data_csv.py para generar el fichero .csv con las particiones del dataset para el modelo.
+
 -Entrenar el modelo ejecutando python /backend/inference/train_model.py (se recomienda disponer de una GPU NVIDIA)
+
