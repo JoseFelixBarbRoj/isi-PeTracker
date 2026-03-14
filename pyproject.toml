@@ -8,6 +8,7 @@ version = "0.1.0"
 requires-python = ">= 3.12"
 authors = [
   {name = "José Félix Barba Rojas", email = "josefelix.barba@alu.uclm.es"},
+  {name = "Akil Espadas Jiménez", email = "akil.espadas@alu.uclm.es"},
 ]
 dependencies = [
   "pandas==3.0.0",
