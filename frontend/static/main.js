@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-    
 
     // ===== PEDIR PERMISO DE NOTIFICACIONES =====
     if ("Notification" in window) {
@@ -17,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
 const uploadBox = document.getElementById("upload-box");
 const fileInput = document.getElementById("pet-photo");
 const form = document.getElementById("upload-form");
-const analyzeBtn = document.getElementById("analyze-btn"); // 👈 IMPORTANTE
+const analyzeBtn = document.getElementById("analyze-btn");
 
 let backendData = null;
 let currentMap = null;
@@ -34,7 +33,7 @@ uploadBox.appendChild(preview);
 uploadBox.appendChild(message);
 
 
-// 🔒 EL BOTÓN EMPIEZA DESACTIVADO
+// 🔒 BOTÓN DESACTIVADO AL INICIO
 if (analyzeBtn) {
     analyzeBtn.disabled = true;
     analyzeBtn.style.opacity = "0.5";
@@ -57,7 +56,6 @@ fileInput.addEventListener("change", () => {
         reader.onload = e => preview.src = e.target.result;
         reader.readAsDataURL(file);
 
-        // ✅ ACTIVAR BOTÓN
         if (analyzeBtn) {
             analyzeBtn.disabled = false;
             analyzeBtn.style.opacity = "1";
@@ -66,7 +64,6 @@ fileInput.addEventListener("change", () => {
 
     } else {
 
-        // ❌ DESACTIVAR SI NO HAY IMAGEN
         if (analyzeBtn) {
             analyzeBtn.disabled = true;
             analyzeBtn.style.opacity = "0.5";
@@ -76,6 +73,10 @@ fileInput.addEventListener("change", () => {
     }
 
 });
+
+
+// ===== DRAG & DROP =====
+
 uploadBox.addEventListener("dragover", e => {
     e.preventDefault();
     uploadBox.style.border = "2px solid #007bff";
@@ -92,11 +93,17 @@ uploadBox.addEventListener("drop", e => {
     fileInput.dispatchEvent(new Event("change"));
 });
 
+
+// ===== FORMATEAR FECHA =====
+
 function formatDate(dateString){
     return new Date(dateString).toLocaleString("es-ES");
 }
 
-function drawMap(data, maxDistance){
+
+// ===== DIBUJAR MAPA =====
+
+function drawMap(data, maxDistance = 50){
 
     if(currentMap){
         currentMap.remove();
@@ -112,16 +119,20 @@ function drawMap(data, maxDistance){
         attribution: "© OpenStreetMap"
     }).addTo(currentMap);
 
+
     const blueIcon = new L.Icon({
         iconUrl: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
         iconSize: [32,32]
     });
 
-    const redIcon = new L.Icon({
-        iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+    const greenIcon = new L.Icon({
+        iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
         iconSize: [32,32]
     });
 
+
+    // ===== TU MASCOTA =====
+    
     L.marker(
         [data.reporte_usuario.latitud, data.reporte_usuario.longitud],
         {icon: blueIcon}
@@ -134,15 +145,18 @@ function drawMap(data, maxDistance){
         <img src="/${data.reporte_usuario.path_imagen}" width="180">
      `);
 
+
+    // ===== PROTECTORAS CERCANAS =====
+
     const cercanos = data.protegidos_similares.filter(
-        p => p.distancia_km <= maxDistance
+        p => !maxDistance || !p.distancia_km || p.distancia_km <= maxDistance
     );
 
     cercanos.forEach(pet => {
 
         L.marker(
             [pet.latitud, pet.longitud],
-            {icon: redIcon}
+            {icon: greenIcon}
         ).addTo(currentMap)
          .bindPopup(`
             <b>🏥 Protectora</b><br>
@@ -157,11 +171,15 @@ function drawMap(data, maxDistance){
 
 }
 
+
+// ===== SUBMIT DEL FORMULARIO =====
+
 form.addEventListener("submit", function(e){
 
     e.preventDefault();
 
     const file = fileInput.files[0];
+
     if(!file){
         message.textContent = "Selecciona una imagen";
         message.style.color = "red";
@@ -215,6 +233,9 @@ form.addEventListener("submit", function(e){
 
 });
 
+
+// ===== FILTROS DE DISTANCIA =====
+
 document.querySelectorAll(".distance-filter button").forEach(btn => {
 
     btn.addEventListener("click", function(){
@@ -226,7 +247,11 @@ document.querySelectorAll(".distance-filter button").forEach(btn => {
 
         if(!backendData) return;
 
-        drawMap(backendData, parseInt(this.dataset.km));
+        const km = this.dataset.km === "all"
+            ? Infinity
+            : parseInt(this.dataset.km);
+
+        drawMap(backendData, km);
 
     });
 
