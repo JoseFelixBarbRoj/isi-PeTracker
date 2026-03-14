@@ -2,13 +2,29 @@ from backend.inference.efficientnet_v2_s import EfficientNetV2
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 import torch
 import cv2
 
-DF = pd.read_csv(Path(__file__).parent / 'inference' / 'data' / 'data.csv')
-IDX_TO_CLASSNAME = {idx_class_name : class_name
-                    for idx_class_name, class_name in enumerate(DF['class'].sort_values().unique().tolist())}
+IDX_TO_CLASSNAME = {
+    0: "beagle",
+    1: "bengal",
+    2: "boxer",
+    3: "british_shorthair",
+    4: "bulldog",
+    5: "chihuahua",
+    6: "dachshund",
+    7: "doberman",
+    8: "husky",
+    9: "labrador",
+    10: "maine_coon",
+    11: "persian",
+    12: "pomeranian",
+    13: "poodle",
+    14: "ragdoll",
+    15: "retriever",
+    16: "siamese",
+    17: "spaniel",
+}
 
 def predict(image_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
