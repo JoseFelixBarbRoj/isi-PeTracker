@@ -285,6 +285,7 @@ ISITest/
 │   │   └── shelter.html           # Shelter dashboard (veterinary clinic profile view)
 │   └── static/
 │       ├── main.js                # Frontend JS (AJAX, map rendering, notifications)
+│       ├── shelter.js  
 │       ├── styles.css
 │       ├── stylesUser.css
 │       ├── stylesShelter.css
@@ -398,8 +399,8 @@ Three main HTML templates are currently implemented:
 | Page | Purpose |
 |------|----------|
 | `login.html` | Unified login interface for both users and shelters |
-| `user.html` | Dashboard for reporting lost pets (upload photo, get location) and visualizing matches on a map |
-| `shelter.html` | Dedicated dashboard for shelters and veterinary clinics with a verified profile view, quick checklist for attending found pets, and map interface. Includes fields for adding pet reports to the system. |
+| `user.html` | Dashboard for reporting lost pets (upload photo, get location) and visualizing matches on a map, also filters for distance |
+| `shelter.html` | Dedicated dashboard for shelters and veterinary clinics with a verified profile view, quick checklist for attending found pets, and map interface with distance and dog/cat filters. Includes fields for adding pet reports to the system. |
 
 The user interface is styled using dedicated CSS files and designed to be responsive for different screen sizes.
 
@@ -432,7 +433,7 @@ Results returned from the backend are displayed dynamically using **Leaflet.js**
 The function `drawMap(data, maxDistance)`:
 - Initializes an interactive Leaflet map centered at the user's location.
 - Drops a distinct blue marker for the user's report.
-- Plots red markers for all nearby matching shelter reports.
+- Plots green markers for all nearby matching shelter reports.
 - Employs popups indicating the match's distance, shelter name, breed, date, and their captured image.
 
 #### Distance Filtering
@@ -449,6 +450,7 @@ The shelter logic includes extra functionality such as:
 - **Species Filtering**: Shelters can filter map markers specifically by dogs or cats.
 - **Initial Data Fetch**: Upon loading the dashboard, it makes a `GET` entry to `/shelter/maps` to retrieve and plot all relevant reports before any new uploads are initiated.
 - **Differentiated Markers**: Custom map pins based on animal type (dog/cat) and origin (lost/clinic).
+- **Bigger Distance Filtering**: above the 50 Km filter it has also an "all" one.
 
 ---
 
