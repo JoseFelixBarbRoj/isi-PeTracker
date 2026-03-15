@@ -29,6 +29,17 @@ const message = document.createElement("div");
 message.style.marginTop = "10px";
 message.style.fontWeight = "bold";
 
+// spinner de huella
+const spinner = document.createElement("span");
+spinner.className = "paw-spinner";
+spinner.textContent = "🐾";
+
+// texto del mensaje
+const messageText = document.createElement("span");
+
+message.appendChild(spinner);
+message.appendChild(messageText);
+
 uploadBox.appendChild(preview);
 uploadBox.appendChild(message);
 
@@ -111,7 +122,7 @@ function drawMap(data, maxDistance = 50){
 
     currentMap = L.map("map").setView(
         [data.reporte_usuario.latitud, data.reporte_usuario.longitud],
-        13
+        8
     );
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -181,12 +192,15 @@ form.addEventListener("submit", function(e){
     const file = fileInput.files[0];
 
     if(!file){
+        spinner.style.display = "none";
         message.textContent = "Selecciona una imagen";
         message.style.color = "red";
         return;
     }
 
-    message.textContent = "Solicitando ubicación...";
+    spinner.style.display = "inline-block";
+    messageText.textContent = "📍 Obteniendo ubicación...";
+    message.style.color = "black";
 
     if(!navigator.geolocation){
         message.textContent = "Geolocalización no soportada";
@@ -214,18 +228,19 @@ form.addEventListener("submit", function(e){
 
             drawMap(data, 50);
 
+            spinner.style.display = "none";
             message.textContent = "Análisis completado ✅";
             message.style.color = "green";
 
         }catch(err){
-
-            message.textContent = "Error al procesar";
+            spinner.style.display = "none";
+            message.textContent = "Error al procesar mapa o modelo";
             message.style.color = "red";
 
         }
 
     }, function(){
-
+        spinner.style.display = "none";
         message.textContent = "No se pudo obtener ubicación";
         message.style.color = "red";
 

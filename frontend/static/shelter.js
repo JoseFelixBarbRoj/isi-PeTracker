@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const fileInput = document.getElementById("pet-photo");
     const analyzeBtn = document.getElementById("analyze-btn");
     const message = document.getElementById("message");
+    const spinner = document.getElementById("loading-spinner");
+    const messageText = document.getElementById("message-text");
 
     const blueIcon = new L.Icon({ iconUrl: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png", iconSize: [32, 32] });
     const orangeIcon = new L.Icon({ iconUrl: "https://maps.google.com/mapfiles/ms/icons/orange-dot.png", iconSize: [32, 32] });
@@ -40,9 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const distanceButtons = document.querySelectorAll(".distance-filter button");
     distanceButtons.forEach(btn => {
-        btn.disabled = true;
-        btn.style.opacity = 0.4;
-        btn.style.cursor = "not-allowed";
+        btn.style.display = "inline-block";
     });
 
     analyzeBtn.disabled = true;
@@ -152,7 +152,8 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        message.textContent = "Solicitando ubicación...";
+        spinner.style.display = "inline-block";
+        messageText.textContent = "📍 Obteniendo ubicación...";
         if (!navigator.geolocation) {
             message.textContent = "Geolocalización no soportada";
             return;
@@ -174,20 +175,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // Activar filtros de distancia
                 distanceButtons.forEach(btn => {
-                    btn.disabled = false;
-                    btn.style.opacity = 1;
-                    btn.style.cursor = "pointer";
+                    btn.style.display = "none";
                 });
 
+                spinner.style.display = "none";
                 message.textContent = "Reporte registrado ✅";
                 message.style.color = "green";
 
             } catch (err) {
-                message.textContent = "Error al procesar " + err.message;
+                spinner.style.display = "none";
+                message.textContent = "Error al procesar mapa o modelo";
                 message.style.color = "red";
             }
 
         }, function () {
+            spinner.style.display = "none";
             message.textContent = "No se pudo obtener ubicación";
             message.style.color = "red";
         });
