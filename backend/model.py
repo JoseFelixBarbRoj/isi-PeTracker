@@ -26,12 +26,9 @@ IDX_TO_CLASSNAME = {
     17: "spaniel",
 }
 
-def predict(image_path):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = EfficientNetV2(num_classes=18)
-    model_path = Path(__file__).parent / 'inference' / 'models' / 'best.pth'
-    model.load_state_dict(torch.load(model_path, map_location=device))
+def predict(model, image_path, device):
     model.eval()
+    model.to(device)
     with torch.inference_mode():
         image = cv2.imread(str(image_path), cv2.IMREAD_COLOR_RGB)
         if image is None:

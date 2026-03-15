@@ -3,6 +3,8 @@ from pathlib import Path
 from datetime import datetime
 from math import radians, cos, sin, sqrt, atan2
 
+import torch
+from backend.inference.efficientnet_v2_s import EfficientNetV2
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -158,7 +160,7 @@ def predict_image():
 
     latitude = float(request.form.get("latitud"))
     longitude = float(request.form.get("longitud"))
-    category = predict(file_path)  
+    category = predict(app.config['MODEL'], file_path, app.config['DEVICE'])  
 
     db.session.add(LostReport(
         path_imagen=f"/static/uploads/{username}/{unique_filename}",
@@ -314,4 +316,13 @@ def shelter_maps():
     })
 
 if __name__ == "__main__":
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = EfficientNetV2(num_classes=18)
+    model_path = Path(__file__).parent / 'inference' / 'models' / 'best.pth'
+    model.load_state_dict(torch.load(model_path, map_location=device))
+    model.to(device)
+    model.eval()
+
+    app.config['MODEL'] = model
+    app.config['DEVICE'] = device
     app.run(debug=True)
