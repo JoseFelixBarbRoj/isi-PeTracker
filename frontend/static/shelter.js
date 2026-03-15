@@ -103,15 +103,6 @@ document.addEventListener("DOMContentLoaded", function () {
             clinicCat: new L.Icon({ iconUrl: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png", iconSize: [32, 32] })
         };
 
-        // ==== TU CLÍNICA ====
-        if (data.reporte_actual) {
-            const especieClinica = razas.Perro.includes(data.reporte_actual.raza) ? "Dog" : "Cat";
-
-            L.marker([data.reporte_actual.latitud, data.reporte_actual.longitud], { icon: icons["clinic" + especieClinica] })
-                .addTo(currentMap)
-                .bindPopup(`<b>🏥 Tu clínica</b><br>Raza: ${data.reporte_actual.raza}<br><img src="/${data.reporte_actual.path_imagen}" width="180">`);
-        }
-
         // ==== MASCOTAS PERDIDAS ====
         data.perdidos
             .filter(p => !maxDistance || !p.distancia_km || p.distancia_km <= maxDistance)
@@ -141,6 +132,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     .addTo(currentMap)
                     .bindPopup(`<b>🏥 Clínica asociada</b><br>Raza: ${p.raza}<br>Protectora: ${p.protectora}<br>${p.distancia_km ? "Distancia: " + p.distancia_km.toFixed(2) + " km<br>" : ""}<br><img src="/${p.path_imagen}" width="150">`);
             });
+
+            // ==== TU CLÍNICA ====
+        if (data.reporte_actual) {
+            const especieClinica = razas.Perro.includes(data.reporte_actual.raza) ? "Dog" : "Cat";
+
+            L.marker([data.reporte_actual.latitud, data.reporte_actual.longitud], { icon: icons["clinic" + especieClinica] })
+                .addTo(currentMap)
+                .bindPopup(`<b>🏥 Tu clínica</b><br>Raza: ${data.reporte_actual.raza}<br><img src="/${data.reporte_actual.path_imagen}" width="180">`);
+        }
     }
 
     // === Botón Analizar ===

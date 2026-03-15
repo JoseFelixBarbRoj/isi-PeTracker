@@ -142,21 +142,6 @@ function drawMap(data, maxDistance = 50){
     });
 
 
-    // ===== TU MASCOTA =====
-    
-    L.marker(
-        [data.reporte_usuario.latitud, data.reporte_usuario.longitud],
-        {icon: blueIcon}
-    ).addTo(currentMap)
-     .bindPopup(`
-        <b>🐾 Tu mascota</b><br>
-        Raza: ${data.reporte_usuario.raza}<br>
-        Usuario: ${data.reporte_usuario.username}<br>
-        Fecha: ${formatDate(data.reporte_usuario.fecha)}<br>
-        <img src="/${data.reporte_usuario.path_imagen}" width="180">
-     `);
-
-
     // ===== PROTECTORAS CERCANAS =====
 
     const cercanos = data.protegidos_similares.filter(
@@ -179,6 +164,20 @@ function drawMap(data, maxDistance = 50){
          `);
 
     });
+
+    // ===== TU MASCOTA =====
+    
+    L.marker(
+        [data.reporte_usuario.latitud, data.reporte_usuario.longitud],
+        {icon: blueIcon}
+    ).addTo(currentMap)
+     .bindPopup(`
+        <b>🐾 Tu mascota</b><br>
+        Raza: ${data.reporte_usuario.raza}<br>
+        Usuario: ${data.reporte_usuario.username}<br>
+        Fecha: ${formatDate(data.reporte_usuario.fecha)}<br>
+        <img src="/${data.reporte_usuario.path_imagen}" width="180">
+     `);
 
 }
 
