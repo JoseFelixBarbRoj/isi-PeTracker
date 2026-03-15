@@ -164,7 +164,7 @@ function drawMap(data, maxDistance = 50){
          `);
 
     });
-
+ 
     // ===== TU MASCOTA =====
     
     L.marker(
