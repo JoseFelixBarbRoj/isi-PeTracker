@@ -156,3 +156,15 @@ button { transition: all 0.2s ease; }
     .container { grid-template-columns:1fr; }
     .map { height:450px; }
 }
+
+.paw-spinner {
+    font-size: 20px;
+    display: none;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
