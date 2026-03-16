@@ -11,6 +11,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const message = document.getElementById("message");
     const spinner = document.getElementById("loading-spinner");
     const messageText = document.getElementById("message-text");
+    const legendClinic = document.getElementById("legend-clinic");
+    legendClinic.style.display = "none";
 
     const blueIcon = new L.Icon({ iconUrl: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png", iconSize: [32, 32] });
     const orangeIcon = new L.Icon({ iconUrl: "https://maps.google.com/mapfiles/ms/icons/orange-dot.png", iconSize: [32, 32] });
@@ -33,6 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let backendData = null;
     let currentMap = null;
+    let reportDone = false;
     let currentSpecies = "all";
 
     const preview = document.createElement("img");
@@ -42,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const distanceButtons = document.querySelectorAll(".distance-filter button");
     distanceButtons.forEach(btn => {
-        btn.style.display = "inline-block";
+        btn.style.display = "none";
     });
 
     analyzeBtn.disabled = true;
@@ -130,16 +133,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 const especie = razas.Perro.includes(p.raza) ? "Dog" : "Cat";
                 L.marker([p.latitud, p.longitud], { icon: icons["shelter" + especie] })
                     .addTo(currentMap)
-                    .bindPopup(`<b>🏥 Clínica asociada</b><br>Raza: ${p.raza}<br>Protectora: ${p.protectora}<br>${p.distancia_km ? "Distancia: " + p.distancia_km.toFixed(2) + " km<br>" : ""}<br><img src="/${p.path_imagen}" width="150">`);
+                    .bindPopup(`<b>🏥 Mascota protegida</b><br>Raza: ${p.raza}<br>Protectora: ${p.protectora}<br>${p.distancia_km ? "Distancia: " + p.distancia_km.toFixed(2) + " km<br>" : ""}<br><img src="/${p.path_imagen}" width="150">`);
             });
 
             // ==== TU CLÍNICA ====
-        if (data.reporte_actual) {
+        if (reportDone && data.reporte_actual) {
             const especieClinica = razas.Perro.includes(data.reporte_actual.raza) ? "Dog" : "Cat";
 
             L.marker([data.reporte_actual.latitud, data.reporte_actual.longitud], { icon: icons["clinic" + especieClinica] })
                 .addTo(currentMap)
-                .bindPopup(`<b>🏥 Tu clínica</b><br>Raza: ${data.reporte_actual.raza}<br><img src="/${data.reporte_actual.path_imagen}" width="180">`);
+                .bindPopup(`<b>🏥 Tu protectora</b><br>Raza: ${data.reporte_actual.raza}<br><img src="/${data.reporte_actual.path_imagen}" width="180">`);
         }
     }
 
@@ -171,11 +174,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const data = await response.json();
                 backendData = data;
-                drawMap(data);
 
+                reportDone = true;
+                legendClinic.style.display = "block";
+
+                drawMap(data);
+                
                 // Activar filtros de distancia
                 distanceButtons.forEach(btn => {
-                    btn.style.display = "none";
+                    btn.style.display = "inline-block";
                 });
 
                 spinner.style.display = "none";

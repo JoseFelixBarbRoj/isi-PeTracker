@@ -227,7 +227,7 @@ def report_protected_pet():
 
     latitude = float(request.form.get("latitud"))
     longitude = float(request.form.get("longitud"))
-    category = predict(file_path)  
+    category = predict(app.config['MODEL'], file_path, app.config['DEVICE']) 
     
     protected = ShelterReport.query.all()
     protected_reports = [
