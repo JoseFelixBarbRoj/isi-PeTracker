@@ -11,9 +11,10 @@ if __name__ == "__main__":
 
     MODEL_URL = 'https://github.com/JoseFelixBarbRoj/isi-PeTracker/releases/download/0.1.0/best.pth'
     SHELTERS_URL = 'https://github.com/JoseFelixBarbRoj/isi-PeTracker/releases/download/0.1.0/shelters_uploads.zip'
-
+    UPLOADS_URL = 'https://github.com/JoseFelixBarbRoj/isi-PeTracker/releases/download/0.1.0/uploads.zip'
     (MODEL_OUTFILE := Path('backend/inference/models/best.pth')).parent.mkdir(parents=True, exist_ok=True)
     SHELTERS_OUTFILE = Path('frontend/static/shelters_uploads.zip')
+    UPLOADS_OUTFILE = Path('frontend/static/uploads.zip')
 
     if not MODEL_OUTFILE.is_file():
 
@@ -44,4 +45,23 @@ if __name__ == "__main__":
         SHELTERS_OUTFILE.unlink()
     else:
         print(f"Shelters file already exists at {SHELTERS_OUTFILE}, skipping download.")
+
+    if not (UPLOADS_OUTFILE.parent / "uploads").is_dir():
+        uploads_response = requests.get(UPLOADS_URL, stream=True)
+        total_uploads_size = int(uploads_response.headers.get("content-length", 0))
+
+        with(tqdm(total=total_uploads_size, unit="B", unit_scale=True) as progress_bar,
+            open(UPLOADS_OUTFILE, "wb") as uploads_fd):
+            for data in uploads_response.iter_content(DOWNLOAD_BLOCK_SIZE):
+                progress_bar.update(len(data))
+                uploads_fd.write(data)
+
+        with zipfile.ZipFile(UPLOADS_OUTFILE, 'r') as zip_ref:
+            zip_ref.extractall(UPLOADS_OUTFILE.parent)
+
+        UPLOADS_OUTFILE.unlink()
+    else:
+        print(f"Uploads file already exists at {UPLOADS_OUTFILE}, skipping download.")
+
+
 
