@@ -8,4 +8,4 @@ venv/
 *.csv
 *.pth
 *.vscode/
-./venv/
+./venv/*
