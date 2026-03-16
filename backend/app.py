@@ -34,7 +34,7 @@ app = Flask(__name__,
 app.secret_key = f"{config['secret_key']}"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-        f"mysql+pymysql://{config['db_user']}:{config['db_password']}@localhost:3306/perros_app"
+        f"mysql+pymysql://{config['db_user']}:{config['db_password']}@{config['db_ip']}:{config['db_port']}/perros_app"
     )
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

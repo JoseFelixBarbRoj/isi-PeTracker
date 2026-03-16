@@ -1,13 +1,15 @@
 Se asume instalación previa de Python 3.12+ Para instalar el paquete:
 Se recomienda utilizar entornos virtuales para instalar el proyecto.
 1) Clonar el repositorio: https://github.com/JoseFelixBarbRoj/isi-PeTracker
-2) Instalar dependencias:
+2) Instalar MySQL Server 8.0
+3) Instalar dependencias:
     a) Para usuarios finales: `pip install . `
     b) Para **desarrolladores** del proyecto: `pip install -e .`
-3) Modificar el archivo config.json con tu usuario y contraseña de MySQLServer, así como la secret key que desees utilizar.
-4) Descargar los assets del proyecto tanto del front-end como del back-end (como el modelo de IA) utilizando el script `project_setup.py`. El siguiente comando descarga los assets necesarios: `python project_setup.py`
-5) Ejecutar el servidor: `python backend/app.py`
-6) Utilizar cualquier navegador como cliente y acceder al servidor.
+4) Modificar el archivo config.json con tu usuario y contraseña de MySQLServer, así como la secret key que desees utilizar.
+5) Descargar los assets del proyecto tanto del front-end como del back-end (como el modelo de IA) utilizando el script `project_setup.py`. El siguiente comando descarga los assets necesarios: `python project_setup.py`
+6) Ejecutar el servidor: `python backend/app.py`
+7) Utilizar cualquier navegador como cliente y acceder al servidor.
+8) Para ejecutar los tests: `make test`
    
 **Opcional** Para entrenar el modelo:
 
