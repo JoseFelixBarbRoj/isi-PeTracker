@@ -300,6 +300,7 @@ ISITest/
 ├── agent.md                       # Agent documentation
 ├── config.json                    # Database configuration
 ├── pyproject.toml                 # Package metadata & dependencies
+├── project_setup.py               # Script to download model weights and static assets
 └── README.md
 ```
 
@@ -349,13 +350,15 @@ Create a `config.json` file in the root directory:
 
 Create the `perros_app` schema in MySQL before running the app; SQLAlchemy will create the tables automatically on first startup.
 
-### 5. Place the trained model weights
+### 5. Run the project setup script
 
-Copy `best.pth` to:
+To automatically download the trained model weights (`best.pth`) and required static assets (`uploads`, `shelters_uploads`, `assets`), run the setup script:
 
+```bash
+python project_setup.py
 ```
-backend/inference/models/best.pth
-```
+
+Alternatively, you can manually obtain these files and place `best.pth` in `backend/inference/models/` and the static assets in `frontend/static/`.
 
 ---
 
