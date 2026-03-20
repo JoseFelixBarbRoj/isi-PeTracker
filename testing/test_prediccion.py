@@ -10,6 +10,8 @@ class TestPrediccion(unittest.TestCase):
 
     def setUp(self):
         app.config["TESTING"] = True
+        app.config["MODEL"] = "mock_model"
+        app.config["DEVICE"] = "cpu"
         self.client = app.test_client()
 
         self.ctx = app.app_context()

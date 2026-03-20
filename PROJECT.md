@@ -476,12 +476,13 @@ All tests are located inside the `testing/` directory and validate the most impo
 
 ## Implemented Test Suites
 
-| Test File                | Purpose                                                                                     |
-| ------------------------ | ------------------------------------------------------------------------------------------- |
-| `test_connectivity.py`   | Verifies connectivity with external services and the database                               |
-| `test_generated_data.py` | Validates that the locally stored dataset matches the data retrieved from the APIs          |
-| `test_login.py`          | Tests the login logic for users and shelters                                                |
-| `test_prediccion.py`     | Tests the `/predict` endpoint including image upload, breed prediction and database storage |
+| Test File                  | Purpose                                                                                               |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `test_connectivity.py`     | Verifies connectivity with external services and the database                                         |
+| `test_generated_data.py`   | Validates that the locally stored dataset matches the data retrieved from the APIs                    |
+| `test_login.py`            | Tests the login logic for users and shelters                                                          |
+| `test_prediccion.py`       | Tests the `/predict` endpoint including image upload, breed prediction and database storage           |
+| `test_shelter_report.py`   | Tests `/report` and `/shelter/maps` endpoints including image upload, data retrieval and authorization |
 
 ---
 
@@ -618,6 +619,71 @@ These tests ensure that the API validates all required input data and enforces a
 
 ---
 
+## Shelter Endpoints Tests
+
+The `test_shelter_report.py` test suite validates the behaviour of the `/report` and `/shelter/maps` endpoints.
+
+These endpoints are responsible for:
+
+* registering pets found by shelters
+* storing protected pet data in the database
+* retrieving shelter-specific and global reports
+* returning structured data for map visualization
+
+### `/report` endpoint tests
+
+The tests simulate a shelter uploading a pet report.
+
+The workflow validated includes:
+
+1. Uploading an image via a simulated POST request.
+2. Mocking the ML model prediction to avoid real inference.
+3. Saving the image in the shelter uploads directory.
+4. Storing the report in the database (`ShelterReport`).
+5. Returning structured JSON data including:
+   * current report (`reporte_actual`)
+   * lost pets (`perdidos`)
+   * existing protected pets (`protegidos`)
+
+The test verifies that:
+
+* the request returns **HTTP 200**
+* the predicted breed matches the mocked value
+* the report is correctly stored in the database
+* the uploaded image is physically saved
+* the JSON structure is correct
+
+### `/shelter/maps` endpoint tests
+
+These tests validate data retrieval for map visualization.
+
+The test setup inserts:
+
+* multiple `ShelterReport` entries
+* multiple `LostReport` entries
+
+The endpoint is then called and validated to ensure:
+
+* only the reports belonging to the logged-in shelter are returned in `protegidos`
+* all lost pet reports are returned in `perdidos`
+* the response format is correct
+* the request returns **HTTP 200**
+
+### Error handling tests
+
+Additional tests ensure correct authorization and validation:
+
+| Test Case                          | Expected Result              |
+| ---------------------------------- | ---------------------------- |
+| Request without session            | Returns **401 Unauthorized** |
+| Request with wrong account type    | Returns **403 Forbidden**    |
+| Missing image in `/report`         | Returns **400 Bad Request**  |
+| Missing coordinates in `/report`   | Returns **400 Bad Request**  |
+
+These tests ensure that shelter endpoints enforce authentication and input validation properly.
+
+---
+
 ## Running the Tests
 
 Run all tests natively:
@@ -639,6 +705,7 @@ python -m unittest testing.test_connectivity
 python -m unittest testing.test_generated_data
 python -m unittest testing.test_login
 python -m unittest testing.test_prediccion
+python -m unittest testing.test_shelter_report
 ```
 
 Run tests with verbose output:
