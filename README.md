@@ -1,5 +1,5 @@
 Se asume instalación previa de Python 3.12+ Para instalar el paquete:
-Se recomienda utilizar entornos virtuales para instalar el proyecto.
+Se recomienda utilizar **entornos virtuales** para instalar el proyecto.
 1) Clonar el repositorio: https://github.com/JoseFelixBarbRoj/isi-PeTracker
 2) Instalar dependencias:
     a) Para usuarios finales: `pip install . `
