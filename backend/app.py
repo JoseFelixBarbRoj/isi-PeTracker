@@ -163,7 +163,7 @@ def predict_image():
     category = predict(app.config['MODEL'], file_path, app.config['DEVICE'])  
 
     db.session.add(LostReport(
-        path_imagen=f"/static/uploads/{username}/{unique_filename}",
+        path_imagen=f"static/uploads/{username}/{unique_filename}",
         raza=category,
         latitud=float(latitude),
         longitud=float(longitude),
@@ -243,7 +243,7 @@ def report_protected_pet():
     for r in protected]
         
     db.session.add(ShelterReport(
-        path_imagen=f"/static/shelters_uploads/{shelter}/{unique_filename}",
+        path_imagen=f"static/shelters_uploads/{shelter}/{unique_filename}",
         raza=category,
         latitud=float(latitude),
         longitud=float(longitude),
