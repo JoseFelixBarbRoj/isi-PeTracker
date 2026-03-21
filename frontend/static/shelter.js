@@ -116,7 +116,11 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .forEach(p => {
                 const especie = razas.Perro.includes(p.raza) ? "Dog" : "Cat";
-                L.marker([p.latitud, p.longitud], { icon: icons["lost" + especie] })
+
+                const displayLat = applyJitter(p.latitud);
+                const displayLon = applyJitter(p.longitud);
+
+                L.marker([displayLat, displayLon], { icon: icons["lost" + especie] })
                     .addTo(currentMap)
                     .bindPopup(`<b>🐾 Mascota perdida</b><br>Raza: ${p.raza}<br>Usuario: ${p.usuario}<br>${p.distancia_km ? "Distancia: " + p.distancia_km.toFixed(2) + " km<br>" : ""}<br><img src="/${p.path_imagen}" width="150">`);
             });
@@ -253,5 +257,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
             drawMap(backendData);
         });
+
+        // Añade un pequeño desvío aleatorio (aprox. 5-10 metros)
+    function applyJitter(coord) {
+        const noise = (Math.random() - 0.5) * 0.0002; // Ajusta el 0.0002 para más/menos dispersión
+        return coord + noise;
+    }
 
 });
