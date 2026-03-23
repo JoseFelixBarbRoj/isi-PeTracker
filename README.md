@@ -8,6 +8,16 @@ Se recomienda utilizar **entornos virtuales** para instalar el proyecto.
 4) Ejecutar `docker compose up`
 5) Ejecutar el servidor: `python backend/app.py`
 6) Utilizar cualquier navegador como cliente y acceder al servidor.
+
+    Datos para el login:
+    | **Usuario**       | **Contraseña** | **Tipo de usuario**|
+    |-------------------|---------------|---------------------|
+    | **carlos**        | **1234**      | **dueño**           |
+    | **juan**          | **abcd**      | **dueño**           |
+    | **maria**         | **5678**      | **dueño**           |
+    | **huellas**       | **4321**      | **protectora**      |
+    | **patas_felices** | **9876**      | **protectora**      |
+
 7) Para ejecutar los tests: `make test`
    
 **Opcional** Para entrenar el modelo:
