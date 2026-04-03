@@ -27,11 +27,10 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    volumes:
-      - .:/app
     working_dir: /app
     command: >
-      sh -c "
+      sh -c "git clone https://github.com/JoseFelixBarbRoj/isi-PeTracker.git . &&
+      pip install . &&
       python project_setup.py &&
       python backend/app.py
       "
