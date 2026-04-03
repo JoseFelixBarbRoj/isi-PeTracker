@@ -10,6 +10,9 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from flask_sqlalchemy import SQLAlchemy
 
 from backend.model import predict
+from backend.utils.logger import setup_logger
+
+logger = setup_logger()
 
 def haversine(lat1, lon1, lat2, lon2):
         R = 6371.0
@@ -94,13 +97,16 @@ def login():
     password = request.form.get("password")
 
     if not nombre or not password:
+        logger.warning(f"LOGIN_FAIL | user={nombre} | reason=missing_credentials")
         return render_template("login.html", error="Usuario/Contraseña incorrectos")
+    
 
     user = User.query.filter_by(nombre=nombre).first()
     if user and user.contraseña_hash == password:
         session["logged_in"] = True
         session["account_type"] = "user"
         session["nombre"] = user.nombre
+        logger.info(f"LOGIN_SUCCESS | type=user | user={user.nombre}")
         return redirect(url_for("user_dashboard"))
 
     shelter = Shelter.query.filter_by(nombre=nombre).first()
@@ -108,8 +114,10 @@ def login():
         session["logged_in"] = True
         session["account_type"] = "shelter"
         session["nombre"] = shelter.nombre
+        logger.info(f"LOGIN_SUCCESS | type=shelter | shelter={shelter.nombre}")
         return redirect(url_for("shelter_dashboard"))
-
+    
+    logger.warning(f"LOGIN_FAIL | user={nombre} | reason=invalid_credentials")
     return render_template("login.html", error="Invalid username or password")
 
 @app.route("/user")
@@ -127,6 +135,8 @@ def shelter_dashboard():
 
 @app.route("/logout")
 def logout():
+    user = session.get("nombre")
+    logger.info(f"LOGOUT | user={user}")
     session.clear() 
     return redirect(url_for("index"))
 
@@ -135,185 +145,241 @@ def logout():
 def predict_image():
     username = session.get("nombre")
     if not username:
+        logger.error("PREDICT_FAIL | reason=invalid_session")
         return jsonify({"error": "Invalid session"}), 401
     
     if session.get("account_type") != "user":
+        logger.warning(f"PREDICT_UNAUTHORIZED | user={username}")
         return jsonify({"error": "Unauthorized"}), 403
     
     if "imagen" not in request.files:
+        logger.warning(f"PREDICT_FAIL | user={username} | reason=no_image")
         return jsonify({"error": "No image provided"}), 400
 
     if not request.form.get("latitud") or not request.form.get("longitud"):
+        logger.warning(f"PREDICT_FAIL | user={username} | reason=missing_coordinates")
         return jsonify({"error": "Missing coordinates"}), 400
 
-    file = request.files["imagen"]
-    original_name = secure_filename(file.filename)
-    user_folder = UPLOAD_FOLDER / username
-    user_folder.mkdir(exist_ok=True, parents=True)
-    timestamp = datetime.now()
-    timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
-    suffix = Path(original_name).suffix
-    stem = Path(original_name).stem       
-    unique_filename = f"{stem}_{timestamp_str}{suffix}"
-    file_path = user_folder / unique_filename
-    file.save(file_path)
+    try:
+        start_time = datetime.now()
+        file = request.files["imagen"]
+        original_name = secure_filename(file.filename)
+        user_folder = UPLOAD_FOLDER / username
+        user_folder.mkdir(exist_ok=True, parents=True)
+        timestamp = datetime.now()
+        timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
+        suffix = Path(original_name).suffix
+        stem = Path(original_name).stem       
+        unique_filename = f"{stem}_{timestamp_str}{suffix}"
+        file_path = user_folder / unique_filename
+        file.save(file_path)
+        logger.debug(
+            f"PREDICT_FILE_SAVED | user={username} | file={unique_filename} | path={file_path}"
+        )
 
-    latitude = float(request.form.get("latitud"))
-    longitude = float(request.form.get("longitud"))
-    category = predict(app.config['MODEL'], file_path, app.config['DEVICE'])  
-
-    db.session.add(LostReport(
-        path_imagen=f"static/uploads/{username}/{unique_filename}",
-        raza=category,
-        latitud=float(latitude),
-        longitud=float(longitude),
-        username=username
-    ))
-    db.session.commit()
-    report = {
-        "raza": category,
-        "latitud": latitude,
-        "longitud": longitude,
-        "fecha": timestamp.strftime("%a, %d %b %Y %H:%M:%S GMT"),
-        "username": session["nombre"],
-        "path_imagen": f"static/uploads/{username}/{unique_filename}"
-    }
-    
-    protected_reports = ShelterReport.query.filter_by(raza=category).all()
-    
-    nearby_protected = [
-    {
-        "raza": r.raza,
-        "latitud": r.latitud,
-        "longitud": r.longitud,
-        "path_imagen": r.path_imagen,
-        "protectora": r.protectora,
-        "timestamp":  r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT"),
-        "distancia_km": haversine(latitude, longitude, float(r.latitud), float(r.longitud))
-    }
-    for r in protected_reports]
-    
-    return jsonify({
-        "reporte_usuario": report,
-        "protegidos_similares": nearby_protected
-    })
+        latitude = float(request.form.get("latitud"))
+        longitude = float(request.form.get("longitud"))
+        category = predict(app.config['MODEL'], file_path, app.config['DEVICE'])  
+        logger.info(
+            f"PREDICT_MODEL_RESULT | user={username} | raza={category} | "
+            f"lat={latitude} lon={longitude}"
+        )
+        db.session.add(LostReport(
+            path_imagen=f"static/uploads/{username}/{unique_filename}",
+            raza=category,
+            latitud=float(latitude),
+            longitud=float(longitude),
+            username=username
+        ))
+        db.session.commit()
+        logger.info(
+            f"PREDICT_DB_COMMIT | user={username} | raza={category} | file={unique_filename}"
+        )
+        report = {
+            "raza": category,
+            "latitud": latitude,
+            "longitud": longitude,
+            "fecha": timestamp.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+            "username": session["nombre"],
+            "path_imagen": f"static/uploads/{username}/{unique_filename}"
+        }
+        
+        protected_reports = ShelterReport.query.filter_by(raza=category).all()
+        
+        nearby_protected = [
+        {
+            "raza": r.raza,
+            "latitud": r.latitud,
+            "longitud": r.longitud,
+            "path_imagen": r.path_imagen,
+            "protectora": r.protectora,
+            "timestamp":  r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+            "distancia_km": haversine(latitude, longitude, float(r.latitud), float(r.longitud))
+        }
+        for r in protected_reports]
+        duration = (datetime.now() - start_time).total_seconds()
+        logger.info(
+            f"PREDICT_SUCCESS | user={username} | raza={category} | "
+            f"matches={len(nearby_protected)} | duration={duration:.2f}s"
+        )
+        return jsonify({
+            "reporte_usuario": report,
+            "protegidos_similares": nearby_protected
+        })
+    except Exception as e:
+        logger.error(f"PREDICT_EXCEPTION | user={username} | error={str(e)}", exc_info=True)
+        return jsonify({"error": "Error interno del servidor"}), 500
     
 @app.route("/report", methods=["POST"])
 def report_protected_pet():
     shelter = session.get("nombre")
     if not shelter:
+        logger.error("SHELTER_REPORT_FAIL | reason=invalid_session")
         return jsonify({"error": "Invalid session"}), 401
     
     if session.get("account_type") != "shelter":
+        logger.warning(f"SHELTER_REPORT_UNAUTHORIZED | shelter={shelter}")
         return jsonify({"error": "Unauthorized"}), 403
     
     if "imagen" not in request.files:
+        logger.warning(f"SHELTER_REPORT_FAIL | shelter={shelter} | reason=no_image")
         return jsonify({"error": "No image provided"}), 400
 
     if not request.form.get("latitud") or not request.form.get("longitud"):
+        logger.warning(f"SHELTER_REPORT_FAIL | shelter={shelter} | reason=missing_coordinates")     
         return jsonify({"error": "Missing coordinates"}), 400
 
-    file = request.files["imagen"]
-    original_name = secure_filename(file.filename)
-    shelter_folder = SHELTER_UPLOAD_FOLDER / shelter
-    shelter_folder.mkdir(exist_ok=True, parents=True)
-    timestamp = datetime.now()
-    timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
-    suffix = Path(original_name).suffix
-    stem = Path(original_name).stem       
-    unique_filename = f"{stem}_{timestamp_str}{suffix}"
-    file_path = shelter_folder / unique_filename
-    file.save(file_path)
+    try:
+        start_time = datetime.now()
+        file = request.files["imagen"]
+        original_name = secure_filename(file.filename)
+        shelter_folder = SHELTER_UPLOAD_FOLDER / shelter
+        shelter_folder.mkdir(exist_ok=True, parents=True)
+        timestamp = datetime.now()
+        timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
+        suffix = Path(original_name).suffix
+        stem = Path(original_name).stem       
+        unique_filename = f"{stem}_{timestamp_str}{suffix}"
+        file_path = shelter_folder / unique_filename
+        file.save(file_path)
+        logger.debug(
+            f"SHELTER_REPORT_FILE_SAVED | shelter={shelter} | file={unique_filename}"
+        )
 
-    latitude = float(request.form.get("latitud"))
-    longitude = float(request.form.get("longitud"))
-    category = predict(app.config['MODEL'], file_path, app.config['DEVICE']) 
-    
-    protected = ShelterReport.query.all()
-    protected_reports = [
-    {
-        "raza": r.raza,
-        "latitud": r.latitud,
-        "longitud": r.longitud,
-        "path_imagen": r.path_imagen,
-        "protectora": r.protectora,
-        "fecha":  r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT"),
-        "distancia_km": haversine(latitude, longitude, float(r.latitud), float(r.longitud))
-    }
-    for r in protected]
+        latitude = float(request.form.get("latitud"))
+        longitude = float(request.form.get("longitud"))
+        category = predict(app.config['MODEL'], file_path, app.config['DEVICE']) 
+        logger.info(
+            f"SHELTER_REPORT_MODEL_RESULT | shelter={shelter} | raza={category} | "
+            f"lat={latitude} lon={longitude}"
+        )
+        protected = ShelterReport.query.all()
+        protected_reports = [
+        {
+            "raza": r.raza,
+            "latitud": r.latitud,
+            "longitud": r.longitud,
+            "path_imagen": r.path_imagen,
+            "protectora": r.protectora,
+            "fecha":  r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+            "distancia_km": haversine(latitude, longitude, float(r.latitud), float(r.longitud))
+        }
+        for r in protected]
+            
+        db.session.add(ShelterReport(
+            path_imagen=f"static/shelters_uploads/{shelter}/{unique_filename}",
+            raza=category,
+            latitud=float(latitude),
+            longitud=float(longitude),
+            protectora=shelter
+        ))
+        db.session.commit()
+        logger.info(
+            f"SHELTER_REPORT_DB_COMMIT | shelter={shelter} | raza={category} | file={unique_filename}"
+        )
+
+        current_report = {
+            "raza": category,
+            "latitud": latitude,
+            "longitud": longitude,
+            "fecha": timestamp.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+            "protectora": session["nombre"],
+            "path_imagen": f"static/shelters_uploads/{shelter}/{unique_filename}"
+        }
         
-    db.session.add(ShelterReport(
-        path_imagen=f"static/shelters_uploads/{shelter}/{unique_filename}",
-        raza=category,
-        latitud=float(latitude),
-        longitud=float(longitude),
-        protectora=shelter
-    ))
-    db.session.commit()
-    
-    current_report = {
-        "raza": category,
-        "latitud": latitude,
-        "longitud": longitude,
-        "fecha": timestamp.strftime("%a, %d %b %Y %H:%M:%S GMT"),
-        "protectora": session["nombre"],
-        "path_imagen": f"static/shelters_uploads/{shelter}/{unique_filename}"
-    }
-    
-    lost = LostReport.query.all()
-    
-    lost_reports = [
-    {
-        "raza": r.raza,
-        "latitud": r.latitud,
-        "longitud": r.longitud,
-        "path_imagen": r.path_imagen,
-        "usuario": r.username,
-        "fecha":  r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT"),
-        "distancia_km": haversine(latitude, longitude, float(r.latitud), float(r.longitud))
-    }
-    for r in lost]
-    
-    return jsonify({
-        "reporte_actual":  current_report,
-        "perdidos": lost_reports,
-        "protegidos": protected_reports
-    })
+        lost = LostReport.query.all()
+        
+        lost_reports = [
+        {
+            "raza": r.raza,
+            "latitud": r.latitud,
+            "longitud": r.longitud,
+            "path_imagen": r.path_imagen,
+            "usuario": r.username,
+            "fecha":  r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+            "distancia_km": haversine(latitude, longitude, float(r.latitud), float(r.longitud))
+        }
+        for r in lost]
+        duration = (datetime.now() - start_time).total_seconds()
+
+        logger.info(
+            f"SHELTER_REPORT_SUCCESS | shelter={shelter} | raza={category} | "
+            f"protected_total={len(protected_reports)} | lost_total={len(lost_reports)} | "
+            f"duration={duration:.2f}s"
+        )
+        return jsonify({
+            "reporte_actual":  current_report,
+            "perdidos": lost_reports,
+            "protegidos": protected_reports
+        })
+    except Exception as e:
+        logger.error(f"SHELTER_REPORT_EXCEPTION | shelter={shelter} | error={str(e)}", exc_info=True)
+        return jsonify({"error": "Error interno del servidor"}), 500
     
 @app.route("/shelter/maps", methods=["GET"])
 def shelter_maps():
     shelter = session.get("nombre")
     if not shelter:
+        logger.error("SHELTER_MAPS_FAIL | reason=invalid_session")
         return jsonify({"error": "Invalid session"}), 401
 
     if session.get("account_type") != "shelter":
+        logger.warning(f"SHELTER_MAPS_UNAUTHORIZED | shelter={shelter}")
         return jsonify({"error": "Unauthorized"}), 403
 
-    protected_reports = ShelterReport.query.filter_by(protectora=shelter).all()
-    return jsonify({
-        "protegidos": [
-            {
-                "raza": r.raza,
-                "latitud": r.latitud,
-                "longitud": r.longitud,
-                "path_imagen": r.path_imagen,
-                "protectora": r.protectora,
-                "fecha": r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT")
-            }
-            for r in protected_reports
-        ],
-        "perdidos": [
-            {
-                "raza": r.raza,
-                "latitud": r.latitud,
-                "longitud": r.longitud,
-                "path_imagen": r.path_imagen,
-                "usuario": r.username,
-                "fecha": r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT")
-            }
-            for r in LostReport.query.all()
-        ]
-    })
+    try:
+        protected_reports = ShelterReport.query.filter_by(protectora=shelter).all()
+        logger.debug(
+            f"SHELTER_MAPS_FETCH | shelter={shelter} | "
+            f"protected_count={len(protected_reports)}"
+        )
+        return jsonify({
+            "protegidos": [
+                {
+                    "raza": r.raza,
+                    "latitud": r.latitud,
+                    "longitud": r.longitud,
+                    "path_imagen": r.path_imagen,
+                    "protectora": r.protectora,
+                    "fecha": r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT")
+                }
+                for r in protected_reports
+            ],
+            "perdidos": [
+                {
+                    "raza": r.raza,
+                    "latitud": r.latitud,
+                    "longitud": r.longitud,
+                    "path_imagen": r.path_imagen,
+                    "usuario": r.username,
+                    "fecha": r.fecha.strftime("%a, %d %b %Y %H:%M:%S GMT")
+                }
+                for r in LostReport.query.all()
+            ]
+        })
+    except Exception as e:
+        logger.error(f"SHELTER_MAPS_EXCEPTION | shelter={shelter} | error={str(e)}", exc_info=True)
+        return jsonify({"error": "Error interno del servidor"}), 500
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
