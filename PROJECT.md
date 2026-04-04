@@ -40,14 +40,14 @@ After a user submits a lost-pet report, the backend queries the shelter database
 Browser
   │
   ▼
-Flask (app.py)
+Flask (app.py)  ────────► Logger (logs/app.log)
   ├── Jinja2 Templates  (frontend/templates/)
   ├── Static Assets     (frontend/static/)
-  ├── SQLAlchemy ORM    ──► MySQL DB (perros_app)
+  ├── SQLAlchemy ORM    ──► MySQL DB (perros_app / perros_test)
   └── ML Inference      ──► model.py ──► EfficientNetV2 (best.pth)
 ```
 
-The application is a **server-rendered Flask MVC app** with AJAX endpoints (`/predict` and `/report`) that return JSON data for map rendering and frontend functionality. All other pages are rendered via Jinja2 templates.
+The application is a **server-rendered Flask MVC app** with AJAX endpoints (`/predict` and `/report`) that return JSON data for map rendering and frontend functionality. All other pages are rendered via Jinja2 templates. The structure is fully **Dockerized** to ensure consistent environments, and a centralized **logging system** captures structured events for monitoring and control purposes.
 
 ---
 
@@ -55,6 +55,7 @@ The application is a **server-rendered Flask MVC app** with AJAX endpoints (`/pr
 
 | Layer | Technology |
 |---|---|
+| Infrastructure | Docker & Docker Compose |
 | Web framework | Flask |
 | ORM | Flask-SQLAlchemy |
 | Database | MySQL (via PyMySQL) |
@@ -70,7 +71,11 @@ The application is a **server-rendered Flask MVC app** with AJAX endpoints (`/pr
 
 ## Database Schema
 
-The database name is **`perros_app`**, configured via MySQL at `localhost:3306`.
+The database is managed via MySQL. The application now isolates data environments:
+- **`perros_app`** — Main production/development database.
+- **`perros_test`** — Isolated testing database.
+
+Configured via Docker networking at `mysql:3306` or `localhost:3306` locally.
 
 ### `usuarios` — Regular Users
 
@@ -263,52 +268,27 @@ ISITest/
 ├── backend/
 │   ├── app.py                     # Flask application, routes, ORM models
 │   ├── model.py                   # ML inference wrapper (predict function)
-│   └── inference/
-│       ├── efficientnet_v2_s.py   # EfficientNetV2 model definition
-│       ├── dataset.py             # PetDataset (PyTorch Dataset)
-│       ├── trainer.py             # Training loop
-│       ├── train_model.py         # Training entry point
-│       ├── metrics.py             # Accuracy function
-│       ├── data.zip               # Raw training dataset archive
-│       ├── data/
-│       │   ├── data.csv           # Class labels CSV
-│       │   ├── gen_data_csv.py    # Script to generate data.csv
-│       │   └── populate_data.py   # Script to populate database
-│       └── models/
-│           ├── best.pth           # Trained model weights
-│           ├── acc_curve.png      # Training accuracy curve
-│           └── loss_curve.png     # Training loss curve
-├── frontend/
-│   ├── templates/
-│   │   ├── login.html             # Login interface
-│   │   ├── user.html              # User dashboard
-│   │   └── shelter.html           # Shelter dashboard (veterinary clinic profile view)
-│   └── static/
-│       ├── main.js                # Frontend JS (AJAX, map rendering, notifications)
-│       ├── shelter.js  
-│       ├── styles.css
-│       ├── stylesUser.css
-│       ├── stylesShelter.css
-│       ├── uploads/               # User-uploaded lost-pet images
-│       ├── shelter_uploads/       # Shelter-uploaded images
-│       └── shelters_uploads/      # Shelter-uploaded pet images
-├── testing/
-│   ├── test_conectividad.py       # DB connectivity tests
-│   ├── test_gen_data.py           # Data generation tests
-│   ├── test_login.py              # Login endpoint tests
-│   └── test_prediccion.py         # ML prediction endpoint tests
-├── agent.md                       # Agent documentation
-├── config.json                    # Database configuration
+│   ├── utils/                     # Utilities including logger implementation
+│   └── inference/                 # ML Training & Inference scripts
+├── frontend/                      # Templates and Static assets
+├── testing/                       # Unit tests
+├── init/mysql/                    # Database initialization scripts
+├── app_logs/                      # Mounted directory for application logs
+├── Dockerfile                     # Docker container definition
+├── docker-compose.yml             # Orchestration for app and mysql services
+├── config.json                    # Database configuration (non-Docker fallback)
 ├── pyproject.toml                 # Package metadata & dependencies
 ├── project_setup.py               # Script to download model weights and static assets
-└── README.md
+├── agent.md                       # Agent documentation
+├── README.md                      # Overview
+└── PROJECT.md                     # Detailed documentation
 ```
 
 ---
 
 ## Installation & Setup
 
-> Requires **Python 3.12+** and a running **MySQL** instance.
+> The project is fully Dockerized. Ensure **Docker** and **Docker Compose** are installed.
 
 ### 1. Clone the repository
 
@@ -317,27 +297,19 @@ git clone https://github.com/JoseFelixBarbRoj/GSI.git
 cd GSI
 ```
 
-### 2. Create and activate a virtual environment *(recommended)*
+### 2. Run with Docker Compose (Recommended)
+
+To automatically build the image, start the MySQL database, configure environments, run the tests against an isolated DB, and launch the Flask application:
 
 ```bash
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# Linux / macOS
-source venv/bin/activate
+docker-compose up --build
 ```
 
-### 3. Install the package
+The application server will be available at `http://127.0.0.1:5000`.
 
-```bash
-# End users
-pip install .
+### Manual Setup (Without Docker)
 
-# Developers (editable mode)
-pip install -e .
-```
-
-### 4. Configure the database
+*(Not Recommended)*
 
 Create a `config.json` file in the root directory:
 
@@ -467,10 +439,24 @@ During development, the database was manually populated with example records for
 
 This sample data allows testing of the matching and map visualization functionality without requiring real user submissions.
 
+---
+
+## Logging System
+
+A robust logging system is now integrated (`backend/utils/logger.py`) to generate logs for monitoring and control.
+Logs are piped to `logs/app.log` (or `app_logs/` on the host side when Dockerized) and out to standard console streams. The logger tracks:
+- Authentication events (`LOGIN_SUCCESS`, `LOGIN_FAIL`, `LOGOUT`).
+- Key logic flows such as prediction results, distances calculated, matching shelter reports count and their resolution latencies (`duration`).
+- Graceful error details and exception traces to facilitate debugging context.
+
+---
+
 ## Testing
 
 Automated tests are implemented using Python’s built-in **`unittest`** framework.
-All tests are located inside the `testing/` directory and validate the most important backend behaviours: connectivity, dataset integrity, authentication, and prediction functionality.
+All tests are located inside the `testing/` directory and validate the most important backend behaviours.
+
+> **Database Isolation:** Unit tests now execute against a dedicated, isolated testing database (`perros_test`) managed automatically by our Docker compose process or the internal testing fixtures. This enforces proper testing data separation from the main application instance (`perros_app`).
 
 ---
 

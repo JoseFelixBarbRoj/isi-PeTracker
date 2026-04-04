@@ -1,13 +1,8 @@
 Se asume instalación previa de Python 3.12+ Para instalar el paquete:
 Se recomienda utilizar **entornos virtuales** para instalar el proyecto.
 1) Clonar el repositorio: https://github.com/JoseFelixBarbRoj/isi-PeTracker
-2) Instalar dependencias:
-    a) Para usuarios finales: `pip install . `
-    b) Para **desarrolladores** del proyecto: `pip install -e .`
-3) Descargar los assets del proyecto tanto del front-end como del back-end (como el modelo de IA) utilizando el script `project_setup.py`. El siguiente comando descarga los assets necesarios: `python project_setup.py`
-4) Ejecutar `docker compose up`
-5) Ejecutar el servidor: `python backend/app.py`
-6) Utilizar cualquier navegador como cliente y acceder al servidor.
+2) Ejecutar `docker compose up`. *Importante:** Si previamente has instalado estos volúmenes, o quieres tener los más actualizados, antes ejecuta: `docker compose down -v``
+3) Utilizar cualquier navegador como cliente y acceder al servidor.
 
     Datos para el login:
     | **Usuario**       | **Contraseña** | **Tipo de usuario**|
@@ -18,11 +13,10 @@ Se recomienda utilizar **entornos virtuales** para instalar el proyecto.
     | **huellas**       | **4321**      | **protectora**      |
     | **patas_felices** | **9876**      | **protectora**      |
 
-7) Para ejecutar los tests: `make test`
+
+Los **tests** se ejecutarán automáticamente una vez acabada la instalación de dependencias,  descarga de assets (como el modelo de IA usado por el servidor) y recopilación de los datos de las APIs empleadas.
    
 **Opcional** Para entrenar el modelo:
-
--Descargar el dataset de entrenamiento: `python /backend/inference/data/populate_data.py`  (tarda aproximadamente 15-20m).
 
 -Ejecutar `python /backend/inference/data/gen_data_csv.py` para generar el fichero CSV con las particiones del dataset para el modelo.
 
