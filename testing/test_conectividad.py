@@ -3,7 +3,7 @@ import requests
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 
-DATABASE_URI = "mysql+pymysql://root:1234@localhost:3306/perros_app"
+DATABASE_URI = "mysql+pymysql://root:1234@mysql:3306/perros_app"
 
 DOG_API_BASE = "https://dog.ceo/api"
 CAT_API_BASE = "https://api.thecatapi.com/v1"

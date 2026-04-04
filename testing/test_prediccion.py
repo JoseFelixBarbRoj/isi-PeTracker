@@ -3,21 +3,18 @@ from io import BytesIO
 from pathlib import Path
 from unittest.mock import patch
 
-from backend.app import app, db, LostReport, UPLOAD_FOLDER
+from backend.app import create_app, db, LostReport
 
 
 class TestPrediccion(unittest.TestCase):
 
     def setUp(self):
-        app.config["TESTING"] = True
-        app.config["MODEL"] = "mock_model"
-        app.config["DEVICE"] = "cpu"
-        self.client = app.test_client()
-
-        self.ctx = app.app_context()
-        self.ctx.push()
-
+        self.app = create_app('testing')
+        self.client = self.app.test_client()
+        self.app_context = self.app.app_context()
+        self.app_context.push()   
         db.create_all()
+        self.upload_folder = self.app.config["UPLOAD_FOLDER"]
 
         with self.client.session_transaction() as sess:
             sess["logged_in"] = True
@@ -27,7 +24,7 @@ class TestPrediccion(unittest.TestCase):
     def tearDown(self):
         db.session.remove()
         db.drop_all()
-        self.ctx.pop()
+        self.app_context.pop()
 
     @patch("backend.app.predict")
     def test_predict_endpoint(self, mock_predict):
@@ -64,7 +61,7 @@ class TestPrediccion(unittest.TestCase):
         self.assertEqual(db_report.raza, "labrador")
         self.assertEqual(db_report.username, "testuser")
 
-        image_path = UPLOAD_FOLDER / "testuser"
+        image_path = self.upload_folder / "testuser"
         self.assertTrue(image_path.exists())
 
         saved_images = list(image_path.glob("*.png"))

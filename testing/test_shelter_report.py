@@ -2,24 +2,19 @@ import unittest
 from io import BytesIO
 from unittest.mock import patch
 
-from backend.app import app, db, ShelterReport, LostReport, SHELTER_UPLOAD_FOLDER
+from backend.app import create_app, db, ShelterReport, LostReport
 
 
 class TestShelterEndpoints(unittest.TestCase):
 
     def setUp(self):
-        app.config["TESTING"] = True
-        app.config["MODEL"] = None
-        app.config["DEVICE"] = "cpu"
-
-        self.client = app.test_client()
-
-        self.ctx = app.app_context()
-        self.ctx.push()
-
+        self.app = create_app('testing')
+        self.client = self.app.test_client()
+        self.app_context = self.app.app_context()
+        self.app_context.push()   
         db.create_all()
+        self.shelter_folder = self.app.config["SHELTER_UPLOAD_FOLDER"]
 
-        # Simular sesión de protectora
         with self.client.session_transaction() as sess:
             sess["logged_in"] = True
             sess["account_type"] = "shelter"
@@ -28,7 +23,7 @@ class TestShelterEndpoints(unittest.TestCase):
     def tearDown(self):
         db.session.remove()
         db.drop_all()
-        self.ctx.pop()
+        self.app_context.pop()
 
     # =========================
     # TEST /report
@@ -66,7 +61,7 @@ class TestShelterEndpoints(unittest.TestCase):
         self.assertEqual(db_report.protectora, "testshelter")
 
         # Imagen guardada
-        folder = SHELTER_UPLOAD_FOLDER / "testshelter"
+        folder = self.shelter_folder / "testshelter"
         self.assertTrue(folder.exists())
         self.assertTrue(len(list(folder.glob("*.png"))) > 0)
 

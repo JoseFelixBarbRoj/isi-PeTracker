@@ -1,35 +1,35 @@
 import unittest
-from backend.app import app, db, User, Shelter
+from backend.app import create_app, db, User, Shelter
 
 
 class TestLogin(unittest.TestCase):
 
     def setUp(self):
-        app.config["TESTING"] = True
-        self.client = app.test_client()
+        self.app = create_app("testing")
+        self.client = self.app.test_client()
+        self.app_context = self.app.app_context()
+        self.app_context.push()
 
-        with app.app_context():
-            db.create_all()
-
-            if not User.query.filter_by(nombre="test_user").first():
+        db.create_all()
+        if not User.query.filter_by(nombre="test_user").first():
                 db.session.add(User(
                     nombre="test_user",
-                    contraseña_hash="1234"
+                    contrasena_hash="1234"
                 ))
 
-            if not Shelter.query.filter_by(nombre="test_shelter").first():
+        if not Shelter.query.filter_by(nombre="test_shelter").first():
                 db.session.add(Shelter(
                     nombre="test_shelter",
-                    contraseña_hash="1234"
+                    contrasena_hash="1234"
                 ))
 
-            db.session.commit()
+        db.session.commit()
 
     def tearDown(self):
-        with app.app_context():
-            db.session.remove()
-            db.drop_all()
-
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+        
     def test_login_user_success(self):
         response = self.client.post("/login", data={
             "nombre": "test_user",

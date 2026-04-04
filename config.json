@@ -2,6 +2,6 @@
     "db_user" : "root",
     "db_password" : "1234",
     "secret_key" : "una_clave_secreta_muy_segura_y_unica",
-    "db_ip": "localhost",
+    "db_ip": "mysql",
     "db_port":3306
 }
