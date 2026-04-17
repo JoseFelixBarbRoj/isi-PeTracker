@@ -79,6 +79,10 @@ document.addEventListener("DOMContentLoaded", function () {
         analyzeBtn.disabled = false;
         analyzeBtn.style.opacity = 1;
         analyzeBtn.style.cursor = "pointer";
+        // Limpiar mensaje al cambiar archivo
+        spinner.style.display = "none";
+        messageText.textContent = "";
+        message.style.color = "black";
     }
 
     function drawMap(data, maxDistance = Infinity) {
@@ -159,10 +163,19 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        // Deshabilitar botón durante el proceso
+        analyzeBtn.disabled = true;
+        analyzeBtn.style.opacity = 0.5;
+        analyzeBtn.style.cursor = "not-allowed";
+
         spinner.style.display = "inline-block";
         messageText.textContent = "📍 Obteniendo ubicación...";
         if (!navigator.geolocation) {
             message.textContent = "Geolocalización no soportada";
+            // Re-habilitar botón
+            analyzeBtn.disabled = false;
+            analyzeBtn.style.opacity = 1;
+            analyzeBtn.style.cursor = "pointer";
             return;
         }
 
@@ -192,17 +205,29 @@ document.addEventListener("DOMContentLoaded", function () {
                 spinner.style.display = "none";
                 message.textContent = "Reporte registrado ✅";
                 message.style.color = "green";
+                // Re-habilitar botón al finalizar
+                analyzeBtn.disabled = false;
+                analyzeBtn.style.opacity = 1;
+                analyzeBtn.style.cursor = "pointer";
 
             } catch (err) {
                 spinner.style.display = "none";
                 message.textContent = "Error al procesar mapa o modelo";
                 message.style.color = "red";
+                // Re-habilitar botón en caso de error
+                analyzeBtn.disabled = false;
+                analyzeBtn.style.opacity = 1;
+                analyzeBtn.style.cursor = "pointer";
             }
 
         }, function () {
             spinner.style.display = "none";
             message.textContent = "No se pudo obtener ubicación";
             message.style.color = "red";
+            // Re-habilitar botón en caso de error de geolocalización
+            analyzeBtn.disabled = false;
+            analyzeBtn.style.opacity = 1;
+            analyzeBtn.style.cursor = "pointer";
         });
     });
 
