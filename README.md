@@ -1,7 +1,7 @@
 Se asume instalación previa de Python 3.12+ Para instalar el paquete:
 Se recomienda utilizar **entornos virtuales** para instalar el proyecto.
 1) Clonar el repositorio: https://github.com/JoseFelixBarbRoj/isi-PeTracker
-2) Ejecutar `docker compose up`. *Importante:** Si previamente has instalado estos volúmenes, o quieres tener los más actualizados, antes ejecuta: `docker compose down -v``
+2) Ejecutar `docker compose up`. Si previamente has instalado estos volúmenes, o quieres tener los más actualizados, antes ejecuta: `docker compose down -v``. *Importante:**  Si este proceso falla, es debido a un error esporádico que experimenta la API de los gatos (https://api.thecatapi.com/). Basta con reintentar.
 3) Utilizar cualquier navegador como cliente y acceder al servidor.
 
     Datos para el login:
